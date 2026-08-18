@@ -1,15 +1,13 @@
 /**
- * ULTIMATE FOOTBALL WEB - CORE & AUTH SYSTEM (STEP 2)
+ * ULTIMATE FOOTBALL WEB - ENGINE WITH INVENTORY & CARD SYSTEM (STEP 3)
  */
 
-// ĐỊNH NGHĨA STORAGE KEYS
 const STORAGE_KEYS = {
   USERS: 'ufw_registered_users',
   SESSION: 'ufw_active_session',
   GAME_DATA_PREFIX: 'ufw_data_'
 };
 
-// CẤU TRÚC GAME DATA MẶC ĐỊNH CHO TÀI KHOẢN MỚI
 const DEFAULT_GAME_DATA = {
   coins: 100000,
   gems: 500,
@@ -18,55 +16,39 @@ const DEFAULT_GAME_DATA = {
   level: 1,
   xp: 0,
   teamOvr: 75,
-  players: [],
-  team: [],
+  players: [1, 2, 6, 15, 16, 20], // ID các cầu thủ khởi tạo sẵn khi mở tài khoản
+  team: [1, 2, 6, 15, 16, 20],
   formation: "4-3-3",
   missions: [],
   transactions: [],
   settings: { sound: true, music: true }
 };
 
-// BIẾN TOÀN CỤC LƯU DỮ LIỆU CỦA USER ĐANG ĐĂNG NHẬP
 let currentUser = null;
 let currentUserData = null;
 
-// ==========================================
-// KHỞI TẠO VÀ LẮNG NGHE SỰ KIỆN
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
-/**
- * Khởi tạo ứng dụng
- */
 function initApp() {
-  console.log("Ultimate Football Web Engine Initialized");
+  console.log("Ultimate Football Web - Step 3 Loaded");
   checkSession();
 }
 
 // ==========================================
-// ĐỒNG BỘ DỮ LIỆU & STORAGE SYSTEM
+// LOCALSTORAGE & SESSION
 // ==========================================
 
-/**
- * Lấy danh sách toàn bộ tài khoản từ localStorage
- */
 function getRegisteredUsers() {
   const data = localStorage.getItem(STORAGE_KEYS.USERS);
   return data ? JSON.parse(data) : {};
 }
 
-/**
- * Lưu danh sách tài khoản
- */
 function saveRegisteredUsers(users) {
   localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
 }
 
-/**
- * Tải game data của user cụ thể từ localStorage
- */
 function loadUserData(username) {
   const key = STORAGE_KEYS.GAME_DATA_PREFIX + username.toLowerCase();
   const data = localStorage.getItem(key);
@@ -74,25 +56,18 @@ function loadUserData(username) {
     try {
       return JSON.parse(data);
     } catch (e) {
-      console.error("Lỗi đọc game data từ LocalStorage:", e);
       return { ...DEFAULT_GAME_DATA };
     }
   }
   return { ...DEFAULT_GAME_DATA };
 }
 
-/**
- * Lưu game data hiện tại của user vào localStorage
- */
 function saveCurrentUserData() {
   if (!currentUser || !currentUserData) return;
   const key = STORAGE_KEYS.GAME_DATA_PREFIX + currentUser.toLowerCase();
   localStorage.setItem(key, JSON.stringify(currentUserData));
 }
 
-/**
- * Kiểm tra phiên đăng nhập khi tải lại trang
- */
 function checkSession() {
   const activeSession = localStorage.getItem(STORAGE_KEYS.SESSION);
   if (activeSession) {
@@ -100,18 +75,16 @@ function checkSession() {
     currentUserData = loadUserData(currentUser);
     hideAuthModal();
     updateUIWithUserData();
+    renderInventory();
   } else {
     showAuthModal();
   }
 }
 
 // ==========================================
-// PHÂN HỆ ĐĂNG NHẬP / ĐĂNG KÝ / ĐĂNG XUẤT
+// AUTHENTICATION HANDLERS
 // ==========================================
 
-/**
- * Chuyển tab giữa Đăng Nhập và Đăng Ký
- */
 function switchAuthTab(tab) {
   hideAuthError();
   const loginBtn = document.getElementById('tab-login-btn');
@@ -132,9 +105,6 @@ function switchAuthTab(tab) {
   }
 }
 
-/**
- * Xử lý sự kiện Đăng ký
- */
 async function handleRegister(event) {
   event.preventDefault();
   hideAuthError();
@@ -143,19 +113,8 @@ async function handleRegister(event) {
   const password = document.getElementById('reg-password').value;
   const passwordConfirm = document.getElementById('reg-password-confirm').value;
 
-  // Validate Frontend
   if (username.length < 3 || username.length > 16) {
     showAuthError("Tên tài khoản phải từ 3 đến 16 ký tự!");
-    return;
-  }
-
-  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-    showAuthError("Tên tài khoản chỉ gồm chữ cái, số và dấu gạch dưới!");
-    return;
-  }
-
-  if (password.length < 4) {
-    showAuthError("Mật khẩu phải chứa ít nhất 4 ký tự!");
     return;
   }
 
@@ -168,38 +127,24 @@ async function handleRegister(event) {
   const userKey = username.toLowerCase();
 
   if (users[userKey]) {
-    showAuthError("Tên tài khoản này đã được đăng ký!");
+    showAuthError("Tên tài khoản này đã tồn tại!");
     return;
   }
 
-  // Đăng ký thành công -> Lưu người dùng
-  users[userKey] = {
-    username: username,
-    password: password, // Chú ý: Đây là bản demo frontend, thực tế phải hash password trên backend
-    createdAt: new Date().toISOString()
-  };
-
+  users[userKey] = { username: username, password: password, createdAt: new Date().toISOString() };
   saveRegisteredUsers(users);
 
-  // Tạo game data mặc định cho user mới
   currentUser = username;
-  currentUserData = { ...DEFAULT_GAME_DATA };
+  currentUserData = JSON.parse(JSON.stringify(DEFAULT_GAME_DATA));
   saveCurrentUserData();
 
-  // Lưu Session
   localStorage.setItem(STORAGE_KEYS.SESSION, username);
 
-  // Cập nhật giao diện
   hideAuthModal();
   updateUIWithUserData();
-
-  // Clear inputs
-  document.getElementById('form-register').reset();
+  renderInventory();
 }
 
-/**
- * Xử lý sự kiện Đăng nhập
- */
 async function handleLogin(event) {
   event.preventDefault();
   hideAuthError();
@@ -211,25 +156,19 @@ async function handleLogin(event) {
   const userKey = username.toLowerCase();
 
   if (!users[userKey] || users[userKey].password !== password) {
-    showAuthError("Tên tài khoản hoặc mật khẩu không chính xác!");
+    showAuthError("Tên tài khoản hoặc mật khẩu không đúng!");
     return;
   }
 
-  // Đăng nhập thành công -> Set session
   currentUser = users[userKey].username;
   currentUserData = loadUserData(currentUser);
   localStorage.setItem(STORAGE_KEYS.SESSION, currentUser);
 
   hideAuthModal();
   updateUIWithUserData();
-
-  // Clear inputs
-  document.getElementById('form-login').reset();
+  renderInventory();
 }
 
-/**
- * Đăng xuất khỏi hệ thống
- */
 function handleLogout() {
   saveCurrentUserData();
   localStorage.removeItem(STORAGE_KEYS.SESSION);
@@ -238,36 +177,17 @@ function handleLogout() {
   showAuthModal();
 }
 
-// ==========================================
-// CẬP NHẬT GIAO DIỆN
-// ==========================================
-
-function showAuthModal() {
-  document.getElementById('auth-modal').classList.add('active');
-}
-
-function hideAuthModal() {
-  document.getElementById('auth-modal').classList.remove('active');
-}
-
+function showAuthModal() { document.getElementById('auth-modal').classList.add('active'); }
+function hideAuthModal() { document.getElementById('auth-modal').classList.remove('active'); }
 function showAuthError(msg) {
   const errBox = document.getElementById('auth-error');
   errBox.innerText = msg;
   errBox.style.display = 'block';
 }
+function hideAuthError() { document.getElementById('auth-error').style.display = 'none'; }
 
-function hideAuthError() {
-  const errBox = document.getElementById('auth-error');
-  errBox.style.display = 'none';
-  errBox.innerText = '';
-}
-
-/**
- * Đồng bộ dữ liệu người dùng lên UI (Header & Stats)
- */
 function updateUIWithUserData() {
   if (!currentUserData) return;
-
   document.getElementById('user-name').innerText = currentUser;
   document.getElementById('user-level').innerText = `LV.${currentUserData.level || 1}`;
   document.getElementById('team-ovr').innerText = currentUserData.teamOvr || 75;
@@ -276,8 +196,152 @@ function updateUIWithUserData() {
   document.getElementById('energy-count').innerText = `${currentUserData.energy || 0}/${currentUserData.maxEnergy || 20}`;
 }
 
+// ==========================================
+// HỆ THỐNG PLAYER CARDS & INVENTORY (BƯỚC 3)
+// ==========================================
+
 /**
- * Chuyển đổi giữa các Section trong Game
+ * Render thẻ cầu thủ theo cấu trúc HTML chuẩn
+ */
+function createCardHTML(player) {
+  const rarityClass = `${player.rarity.toLowerCase()}-card`;
+  return `
+    <div class="player-card ${rarityClass}" onclick="openPlayerModal(${player.id})">
+      <div class="card-inner">
+        <div class="card-top">
+          <div class="card-ovr-box">
+            <span class="card-ovr">${player.overall}</span>
+            <span class="card-pos">${player.position}</span>
+          </div>
+          <div class="card-flag">${player.country}</div>
+        </div>
+        <div class="card-image-wrapper">
+          <img src="${player.image}" alt="${player.name}" class="player-img">
+        </div>
+        <div class="card-info">
+          <div class="card-name">${player.name.toUpperCase()}</div>
+          <div class="card-stats-grid">
+            <div class="stat-box"><span>PAC</span><strong>${player.pace}</strong></div>
+            <div class="stat-box"><span>SHO</span><strong>${player.shooting}</strong></div>
+            <div class="stat-box"><span>PAS</span><strong>${player.passing}</strong></div>
+            <div class="stat-box"><span>DRI</span><strong>${player.dribbling}</strong></div>
+            <div class="stat-box"><span>DEF</span><strong>${player.defending}</strong></div>
+            <div class="stat-box"><span>PHY</span><strong>${player.physical}</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Hiển thị kho cầu thủ người chơi đang sở hữu kèm Lọc, Tìm kiếm, Sắp xếp
+ */
+function renderInventory() {
+  if (!currentUserData || !currentUserData.players) return;
+
+  const gridContainer = document.getElementById('inventory-grid');
+  const countSpan = document.getElementById('inventory-count');
+  
+  const searchVal = document.getElementById('inventory-search').value.toLowerCase().trim();
+  const posVal = document.getElementById('filter-position').value;
+  const rarityVal = document.getElementById('filter-rarity').value;
+  const sortVal = document.getElementById('sort-players').value;
+
+  // Lấy toàn bộ cầu thủ người chơi sở hữu dựa trên danh sách ID trong localStorage
+  let ownedPlayers = currentUserData.players.map(id => PLAYERS_DATABASE.find(p => p.id === id)).filter(Boolean);
+
+  // 1. Tìm kiếm theo tên
+  if (searchVal) {
+    ownedPlayers = ownedPlayers.filter(p => p.name.toLowerCase().includes(searchVal));
+  }
+
+  // 2. Lọc theo vị trí
+  if (posVal !== 'ALL') {
+    ownedPlayers = ownedPlayers.filter(p => p.position === posVal);
+  }
+
+  // 3. Lọc theo độ hiếm
+  if (rarityVal !== 'ALL') {
+    ownedPlayers = ownedPlayers.filter(p => p.rarity === rarityVal);
+  }
+
+  // 4. Sắp xếp
+  ownedPlayers.sort((a, b) => {
+    if (sortVal === 'OVR_DESC') return b.overall - a.overall;
+    if (sortVal === 'OVR_ASC') return a.overall - b.overall;
+    if (sortVal === 'PRICE_DESC') return b.price - a.price;
+    if (sortVal === 'PRICE_ASC') return a.price - b.price;
+    return 0;
+  });
+
+  countSpan.innerText = ownedPlayers.length;
+
+  if (ownedPlayers.length === 0) {
+    gridContainer.innerHTML = `<div class="no-players-msg">Không tìm thấy cầu thủ nào phù hợp!</div>`;
+    return;
+  }
+
+  gridContainer.innerHTML = ownedPlayers.map(p => createCardHTML(p)).join('');
+}
+
+/**
+ * Mở Popup xem chi tiết Cầu thủ
+ */
+function openPlayerModal(playerId) {
+  const player = PLAYERS_DATABASE.find(p => p.id === playerId);
+  if (!player) return;
+
+  const modal = document.getElementById('player-modal');
+  const modalBody = document.getElementById('player-modal-body');
+
+  modalBody.innerHTML = `
+    <div class="player-detail-container">
+      ${createCardHTML(player)}
+      <div style="text-align: center;">
+        <h3 style="font-family: var(--font-heading); font-size: 28px; color: var(--cyan-primary);">${player.name}</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Độ hiếm: <strong style="color: #fff;">${player.rarity}</strong> | Vị trí: <strong style="color: #fff;">${player.position}</strong></p>
+        <p style="font-size: 14px; color: var(--gold-primary); margin-top: 4px;">Giá thị trường: 🪙 ${player.price.toLocaleString('vi-VN')} Coins</p>
+      </div>
+
+      <div class="detail-stats-list">
+        <div class="stat-row">
+          <span>Tốc độ (PAC): <strong>${player.pace}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.pace}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span>Sút bóng (SHO): <strong>${player.shooting}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.shooting}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span>Chuyền bóng (PAS): <strong>${player.passing}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.passing}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span>Rê bóng (DRI): <strong>${player.dribbling}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.dribbling}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span>Phòng ngự (DEF): <strong>${player.defending}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.defending}%;"></div></div>
+        </div>
+        <div class="stat-row">
+          <span>Thể lực (PHY): <strong>${player.physical}</strong></span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.physical}%;"></div></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+function closePlayerModal() {
+  document.getElementById('player-modal').classList.remove('active');
+}
+
+/**
+ * Switch Navigation Tab
  */
 function switchSection(sectionId) {
   const sections = document.querySelectorAll('.game-section');
@@ -295,6 +359,10 @@ function switchSection(sectionId) {
       btn.classList.add('active');
     }
   });
+
+  if (sectionId === 'players') {
+    renderInventory();
+  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
