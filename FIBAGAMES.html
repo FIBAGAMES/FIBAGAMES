@@ -10,7 +10,6 @@
       --bg-glass: rgba(10, 20, 28, 0.85);
       --discord-blue: #5865f2;
       --wireframe-border: #3a415a;
-      --wireframe-bg: #111827;
       --wireframe-box: #1f2937;
     }
 
@@ -21,8 +20,9 @@
       font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    /* BACKGROUND MÀU ĐEN TUYỀN CHO TOÀN BỘ TRANG */
     body {
-      background: #050b10 url('https://png.pngtree.com/thumb_back/fh260/background/20230524/pngtree-soccer-stadium-in-the-dark-lit-image_2611677.jpg') no-repeat center center / cover;
+      background-color: #000000;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -43,7 +43,7 @@
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(0, 255, 204, 0.3);
       border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 255, 204, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 204, 0.15);
       position: relative;
       overflow: hidden;
     }
@@ -122,23 +122,6 @@
     .icon-wrapper img { width: 100%; height: 100%; object-fit: contain; }
     .btn-text { flex: 1; text-align: center; margin-right: 12px; }
 
-    /* Nút Xóa Data Test */
-    .btn-reset-data {
-      margin-top: 20px;
-      background: rgba(242, 63, 67, 0.2);
-      border: 1px solid #f23f43;
-      color: #ff8080;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-reset-data:hover {
-      background: #f23f43;
-      color: #fff;
-    }
-
     /* 2. KHUNG ĐẶT TÊN (NAME MODAL) */
     .name-modal {
       display: none;
@@ -146,7 +129,7 @@
       max-width: 480px;
       background: #18191c;
       border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
       overflow: hidden;
       border: 1px solid #2b2d31;
     }
@@ -241,12 +224,12 @@
       cursor: pointer;
     }
 
-    /* 3. TRANG CHỦ GAME (KHUNG XƯƠNG WIREFRAME DỰA THEO ẢNH GỬI) */
+    /* 3. TRANG CHỦ GAME (BACKGROUND MÀU ĐEN) */
     .dashboard-container {
       display: none;
       width: 100vw;
       height: 100vh;
-      background-color: var(--wireframe-bg);
+      background-color: #000000; /* Nền màu đen */
       position: fixed;
       top: 0;
       left: 0;
@@ -268,7 +251,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       padding: 8px 16px;
       border-radius: 8px;
@@ -288,7 +271,7 @@
     }
 
     .currency-item {
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       padding: 8px 16px;
       border-radius: 8px;
@@ -304,7 +287,7 @@
     .icon-box {
       width: 40px;
       height: 40px;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       border-radius: 8px;
       display: flex;
@@ -330,7 +313,7 @@
 
     .side-item {
       height: 60px;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       border-radius: 8px;
       display: flex;
@@ -341,17 +324,21 @@
       text-transform: uppercase;
     }
 
+    /* BANNER CẦU THỦ VỚI LINK SẠCH CHẤT LƯỢNG CAO VĨNH VIỄN */
     .hero-banner {
       flex: 1.2;
-      background: var(--wireframe-box);
-      border: 1px dashed var(--wireframe-border);
+      background: #111827 url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200') no-repeat center center / cover;
+      border: 1px solid var(--wireframe-border);
       border-radius: 12px;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      color: #6b7280;
-      font-weight: bold;
+      padding-bottom: 15px;
+      color: #ffffff;
+      font-weight: 900;
       text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.6);
     }
 
     .right-widgets {
@@ -363,7 +350,7 @@
 
     .widget-top {
       flex: 2;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       border-radius: 12px;
       display: flex;
@@ -381,7 +368,7 @@
 
     .sub-widget {
       flex: 1;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       border-radius: 12px;
       display: flex;
@@ -394,7 +381,7 @@
     .bottom-bar {
       display: flex;
       justify-content: space-around;
-      background: var(--wireframe-box);
+      background: #111827;
       border: 1px dashed var(--wireframe-border);
       padding: 12px;
       border-radius: 8px;
@@ -434,9 +421,6 @@
     </div>
   </div>
 
-  <!-- NÚT XÓA LOCALSTORAGE BẰNG TAY DÙNG ĐỂ TEST -->
-  <button class="btn-reset-data" id="resetBtn" onclick="clearAllData()">🗑️ XÓA LOCALSTORAGE (RESET DATA)</button>
-
   <!-- 2. BẢNG ĐẶT TÊN NHÂN VẬT -->
   <div class="name-modal" id="nameModal">
     <div class="name-header">ENTER A NAME</div>
@@ -459,7 +443,7 @@
     </div>
   </div>
 
-  <!-- 3. TRANG CHỦ GAME (KHUNG XƯƠNG WIREFRAME) -->
+  <!-- 3. TRANG CHỦ GAME (BACKGROUND MÀU ĐEN + BANNER LINK SẠCH) -->
   <div class="dashboard-container" id="dashboard">
     <div class="top-bar">
       <div class="user-info-box">
@@ -491,8 +475,9 @@
         <div class="side-item">KHU PHỨC HỢP</div>
       </div>
 
+      <!-- BANNER CẦU THỦ THỦ CÔNG / EVENTS -->
       <div class="hero-banner">
-        [ BANNER CẦU THỦ THỦ CÔNG / EVENTS ]
+        BANNER CẦU THỦ THỦ CÔNG
       </div>
 
       <div class="right-widgets">
@@ -517,8 +502,11 @@
   <script>
     const DISCORD_CLIENT_ID = '1539176267994366002';
     const REDIRECT_URI = encodeURIComponent(window.location.href.split('#')[0]);
-
     const BAD_WORDS = ['admin', 'hack', 'bitch', 'fuck', 'cc', 'cl', 'dm', 'dkm', 'sex'];
+
+    // 1. TỰ ĐỘNG XÓA TOÀN BỘ DATA MỖI KHI LOAD LẠI TRANG NẾU BẠN MUỐN RESET VỀ MẶC ĐỊNH
+    // (Bỏ comment dòng dưới nếu muốn mỗi lần F5 là tự xáo data sạch hoàn toàn)
+    // localStorage.clear();
 
     function getUsedNames() {
       return JSON.parse(localStorage.getItem('registered_names') || '["admin", "proplayer"]');
@@ -529,40 +517,33 @@
     }
 
     function loginWithDiscord() {
-      // Giả lập ID Discord người dùng
-      const currentDiscordId = "user_discord_888";
+      const currentDiscordId = "user_discord_" + Math.floor(Math.random() * 1000);
       localStorage.setItem('current_user_id', currentDiscordId);
 
       const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify%20email`;
       window.location.href = discordAuthUrl;
     }
 
-    // Tự động kiểm tra trạng thái
     window.onload = function() {
       const fragment = new URLSearchParams(window.location.hash.slice(1));
       const accessToken = fragment.get('access_token');
       const currentUserId = localStorage.getItem('current_user_id');
       const userProfiles = getUserProfiles();
 
-      // Nếu đã có ID Discord hoặc quay lại từ Discord thành công
       if (accessToken || currentUserId) {
         document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('resetBtn').style.display = 'none';
-        
-        // Xóa token trên URL cho sạch
         if (accessToken) history.replaceState(null, null, window.location.pathname);
 
-        // NẾU ĐÃ CÓ TÊN RỒI -> VÀO THẲNG TRANG CHỦ
+        // NẾU TÀI KHOẢN ĐÃ CÓ TÊN -> VÀO THẲNG TRANG CHỦ
         if (currentUserId && userProfiles[currentUserId]) {
           showDashboard(userProfiles[currentUserId]);
         } else {
-          // NẾU CHƯA CÓ TÊN -> HIỆN POPUP ĐẶT TÊN
+          // CHƯA CÓ TÊN -> HIỆN FORM ĐẶT TÊN
           document.getElementById('nameModal').style.display = 'block';
         }
       }
     };
 
-    // Kiểm tra tên nhập vào
     const nameInput = document.getElementById('usernameInput');
     const continueBtn = document.getElementById('continueBtn');
     const errorMsg = document.getElementById('errorMsg');
@@ -619,42 +600,35 @@
       }
     }
 
-    // Bấm nút CONTINUE để lưu tên và CHUYỂN TRỰC TIẾP VÀO TRANG CHỦ
     function submitName() {
       const finalName = nameInput.value.trim();
       if (finalName) {
-        // 1. Lưu tên vào danh sách đã dùng
         let usedNames = getUsedNames();
         usedNames.push(finalName.toLowerCase());
         localStorage.setItem('registered_names', JSON.stringify(usedNames));
 
-        // 2. Gắn tên với ID Discord
-        let currentUserId = localStorage.getItem('current_user_id') || "user_discord_888";
+        let currentUserId = localStorage.getItem('current_user_id') || "user_discord_default";
         localStorage.setItem('current_user_id', currentUserId);
         
         let userProfiles = getUserProfiles();
         userProfiles[currentUserId] = finalName;
         localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
 
-        // 3. Mở thẳng Trang Chủ Game
         showDashboard(finalName);
       }
     }
 
-    // Hàm mở Trang Chủ
     function showDashboard(username) {
       document.getElementById('loginModal').style.display = 'none';
       document.getElementById('nameModal').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'none';
 
       document.getElementById('displayUsername').innerText = username.toUpperCase();
       document.getElementById('dashboard').style.display = 'flex';
     }
 
-    // Hàm Xóa Sạch Data LocalStorage để Test lại
     function clearAllData() {
       localStorage.clear();
-      alert('Đã xóa sạch dữ liệu localStorage! Trang web sẽ tải lại.');
+      alert('Đã xóa dữ liệu thành công!');
       location.href = window.location.pathname;
     }
   </script>
