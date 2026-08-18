@@ -63,12 +63,21 @@
     </div>
   </div>
 
+  <!-- SQUAD PLAYER PICKER MODAL (BƯỚC 5) -->
+  <div id="picker-modal" class="modal-overlay">
+    <div class="modal-content picker-card">
+      <button class="modal-close" onclick="closePickerModal()">✕</button>
+      <h3 class="picker-title" id="picker-slot-title">CHỌN CẦU THỦ CHO VỊ TRÍ</h3>
+      <p class="picker-subtitle">Chọn cầu thủ thích hợp từ Kho để xếp vào sân</p>
+      <div id="picker-players-grid" class="cards-grid picker-grid"></div>
+    </div>
+  </div>
+
   <!-- PACK OPENING ANIMATION OVERLAY -->
   <div id="pack-opening-overlay" class="pack-overlay">
     <div class="pack-animation-stage">
       <div class="light-beams"></div>
       
-      <!-- Giai đoạn 1: Gói Thẻ Xuất Hiện & Rung -->
       <div id="pack-3d-box" class="pack-3d-box" onclick="triggerPackBurst()">
         <div class="pack-surface">
           <div class="pack-badge" id="pack-overlay-title">GOLD PACK</div>
@@ -76,7 +85,6 @@
         </div>
       </div>
 
-      <!-- Giai đoạn 2: Lóe Sáng & Lật Thẻ Cầu Thủ -->
       <div id="pack-reveal-card" class="pack-reveal-card">
         <div id="revealed-card-container"></div>
         <button class="btn-claim-player" onclick="closePackOpening()">THU NHẬP CẦU THỦ</button>
@@ -181,13 +189,46 @@
         </div>
       </section>
 
-      <!-- ĐỘI HÌNH -->
+      <!-- ĐỘI HÌNH (BƯỚC 5) -->
       <section id="section-team" class="game-section">
-        <h2 class="section-title">MY TEAM - ĐỘI HÌNH</h2>
-        <div class="placeholder-box">Màn hình Quản lý Đội hình (Sẽ phát triển ở Bước 5)</div>
+        <div class="team-header">
+          <div>
+            <h2 class="section-title">MY TEAM - ĐỘI HÌNH CHÍNH</h2>
+            <p class="section-subtitle">Chạm vào từng vị trí để thay đổi cầu thủ thi đấu</p>
+          </div>
+
+          <div class="squad-controls">
+            <div class="formation-selector">
+              <label for="select-formation">SƠ ĐỒ CHIẾN THUẬT:</label>
+              <select id="select-formation" onchange="changeFormation(this.value)">
+                <option value="4-3-3">4-3-3 (Tấn Công)</option>
+                <option value="4-4-2">4-4-2 (Cân Bằng)</option>
+                <option value="3-5-2">3-5-2 (Kiểm Soát)</option>
+              </select>
+            </div>
+            
+            <div class="squad-rating-box">
+              <span class="rating-label">TỔNG CHỈ SỐ ĐỘI:</span>
+              <span id="squad-total-ovr" class="rating-value">75</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SÂN BÓNG BẢN ĐỒ VỊ TRÍ 11 CẦU THỦ -->
+        <div class="pitch-container">
+          <div class="pitch-grass">
+            <div class="pitch-line center-circle"></div>
+            <div class="pitch-line center-line"></div>
+            <div class="pitch-line penalty-box top"></div>
+            <div class="pitch-line penalty-box bottom"></div>
+
+            <!-- Container 11 ví trí trên sân -->
+            <div id="pitch-slots-container" class="pitch-slots-container"></div>
+          </div>
+        </div>
       </section>
 
-      <!-- KHO CẦU THỦ (INVENTORY) -->
+      <!-- KHO CẦU THỦ -->
       <section id="section-players" class="game-section">
         <div class="inventory-header">
           <h2 class="section-title">MY PLAYERS (<span id="inventory-count">0</span>)</h2>
@@ -225,13 +266,12 @@
         <div id="inventory-grid" class="cards-grid"></div>
       </section>
 
-      <!-- PACK STORE (BƯỚC 4) -->
+      <!-- PACK STORE -->
       <section id="section-packs" class="game-section">
         <h2 class="section-title">PACK STORE - CỬA HÀNG GÓI THẺ</h2>
         <p class="section-subtitle">Mở gói thẻ để sở hữu các cầu thủ xuất sắc nhất thế giới!</p>
 
         <div class="packs-grid">
-          <!-- GÓI CHUẨN -->
           <div class="pack-card basic-pack-card">
             <div class="pack-header">
               <span class="pack-tag">CƠ BẢN</span>
@@ -248,7 +288,6 @@
             </button>
           </div>
 
-          <!-- GÓI CAO CẤP -->
           <div class="pack-card gold-pack-card">
             <div class="pack-header">
               <span class="pack-tag gold">HOT</span>
@@ -265,7 +304,6 @@
             </div>
           </div>
 
-          <!-- GÓI ICON HUYỀN THOẠI -->
           <div class="pack-card icon-pack-card">
             <div class="pack-header">
               <span class="pack-tag icon">VIP</span>
