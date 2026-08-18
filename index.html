@@ -59,8 +59,27 @@
   <div id="player-modal" class="modal-overlay">
     <div class="modal-content player-detail-card">
       <button class="modal-close" onclick="closePlayerModal()">✕</button>
-      <div class="modal-body" id="player-modal-body">
-        <!-- Render chi tiết cầu thủ tại đây bằng JS -->
+      <div class="modal-body" id="player-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- PACK OPENING ANIMATION OVERLAY -->
+  <div id="pack-opening-overlay" class="pack-overlay">
+    <div class="pack-animation-stage">
+      <div class="light-beams"></div>
+      
+      <!-- Giai đoạn 1: Gói Thẻ Xuất Hiện & Rung -->
+      <div id="pack-3d-box" class="pack-3d-box" onclick="triggerPackBurst()">
+        <div class="pack-surface">
+          <div class="pack-badge" id="pack-overlay-title">GOLD PACK</div>
+          <div class="pack-tap-hint">NHẤP ĐỂ MỞ</div>
+        </div>
+      </div>
+
+      <!-- Giai đoạn 2: Lóe Sáng & Lật Thẻ Cầu Thủ -->
+      <div id="pack-reveal-card" class="pack-reveal-card">
+        <div id="revealed-card-container"></div>
+        <button class="btn-claim-player" onclick="closePackOpening()">THU NHẬP CẦU THỦ</button>
       </div>
     </div>
   </div>
@@ -125,7 +144,6 @@
 
           <div class="featured-player">
             <div class="card-title-tag">FEATURED ICON</div>
-            
             <div class="player-card icon-card">
               <div class="card-inner">
                 <div class="card-top">
@@ -151,7 +169,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -174,11 +191,8 @@
       <section id="section-players" class="game-section">
         <div class="inventory-header">
           <h2 class="section-title">MY PLAYERS (<span id="inventory-count">0</span>)</h2>
-          
-          <!-- BỘ LỌC VÀ TÌM KIẾM -->
           <div class="filter-bar">
             <input type="text" id="inventory-search" placeholder="🔍 Tìm tên cầu thủ..." oninput="renderInventory()">
-            
             <select id="filter-position" onchange="renderInventory()">
               <option value="ALL">Tất cả Vị trí</option>
               <option value="ST">ST - Tiền đạo cắm</option>
@@ -192,7 +206,6 @@
               <option value="RB">RB - Hậu vệ phải</option>
               <option value="GK">GK - Thủ môn</option>
             </select>
-
             <select id="filter-rarity" onchange="renderInventory()">
               <option value="ALL">Tất cả Độ hiếm</option>
               <option value="ICON">ICON</option>
@@ -201,7 +214,6 @@
               <option value="RARE">RARE</option>
               <option value="COMMON">COMMON</option>
             </select>
-
             <select id="sort-players" onchange="renderInventory()">
               <option value="OVR_DESC">OVR: Cao -> Thấp</option>
               <option value="OVR_ASC">OVR: Thấp -> Cao</option>
@@ -210,17 +222,65 @@
             </select>
           </div>
         </div>
-
-        <!-- GRID CẦU THỦ -->
-        <div id="inventory-grid" class="cards-grid">
-          <!-- Các thẻ cầu thủ sẽ tự động render bằng JavaScript -->
-        </div>
+        <div id="inventory-grid" class="cards-grid"></div>
       </section>
 
-      <!-- PACKS -->
+      <!-- PACK STORE (BƯỚC 4) -->
       <section id="section-packs" class="game-section">
-        <h2 class="section-title">PACKS - CỬA HÀNG GÓI</h2>
-        <div class="placeholder-box">Khu vực Mở Pack (Sẽ phát triển ở Bước 4)</div>
+        <h2 class="section-title">PACK STORE - CỬA HÀNG GÓI THẺ</h2>
+        <p class="section-subtitle">Mở gói thẻ để sở hữu các cầu thủ xuất sắc nhất thế giới!</p>
+
+        <div class="packs-grid">
+          <!-- GÓI CHUẨN -->
+          <div class="pack-card basic-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag">CƠ BẢN</span>
+              <h3>STANDARD PACK</h3>
+            </div>
+            <div class="pack-visual">📦</div>
+            <div class="pack-rates">
+              <div>Common: <strong>70%</strong></div>
+              <div>Rare: <strong>25%</strong></div>
+              <div>Epic: <strong>5%</strong></div>
+            </div>
+            <button class="btn-buy-pack" onclick="handleBuyPack('STANDARD')">
+              🪙 10,000 Coins
+            </button>
+          </div>
+
+          <!-- GÓI CAO CẤP -->
+          <div class="pack-card gold-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag gold">HOT</span>
+              <h3>GOLD PREMIUM PACK</h3>
+            </div>
+            <div class="pack-visual">🎁</div>
+            <div class="pack-rates">
+              <div>Rare: <strong>50%</strong> | Epic: <strong>35%</strong></div>
+              <div>Legend: <strong>14%</strong> | Icon: <strong>1%</strong></div>
+            </div>
+            <div class="pack-actions">
+              <button class="btn-buy-pack gold" onclick="handleBuyPack('GOLD_COINS')">🪙 50,000</button>
+              <button class="btn-buy-pack gem" onclick="handleBuyPack('GOLD_GEMS')">💎 100</button>
+            </div>
+          </div>
+
+          <!-- GÓI ICON HUYỀN THOẠI -->
+          <div class="pack-card icon-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag icon">VIP</span>
+              <h3>ULTIMATE ICON PACK</h3>
+            </div>
+            <div class="pack-visual">✨</div>
+            <div class="pack-rates">
+              <div>Epic: <strong>40%</strong> | Legend: <strong>45%</strong></div>
+              <div style="color: var(--gold-primary);">Icon: <strong>15%</strong></div>
+            </div>
+            <button class="btn-buy-pack icon" onclick="handleBuyPack('ULTIMATE_ICON')">
+              💎 500 Gems
+            </button>
+          </div>
+        </div>
       </section>
 
       <!-- MARKET -->
