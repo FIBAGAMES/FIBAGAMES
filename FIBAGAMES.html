@@ -25,6 +25,7 @@
       background: #050b10 url('https://png.pngtree.com/thumb_back/fh260/background/20230524/pngtree-soccer-stadium-in-the-dark-lit-image_2611677.jpg') no-repeat center center / cover;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 16px;
@@ -120,6 +121,23 @@
 
     .icon-wrapper img { width: 100%; height: 100%; object-fit: contain; }
     .btn-text { flex: 1; text-align: center; margin-right: 12px; }
+
+    /* Nút Xóa Data Test */
+    .btn-reset-data {
+      margin-top: 20px;
+      background: rgba(242, 63, 67, 0.2);
+      border: 1px solid #f23f43;
+      color: #ff8080;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-reset-data:hover {
+      background: #f23f43;
+      color: #fff;
+    }
 
     /* 2. KHUNG ĐẶT TÊN (NAME MODAL) */
     .name-modal {
@@ -223,7 +241,7 @@
       cursor: pointer;
     }
 
-    /* 3. TRANG CHỦ KHI ĐÃ ĐĂNG NHẬP (DẠNG KHUNG XƯƠNG - WIREFRAME) */
+    /* 3. TRANG CHỦ GAME (KHUNG XƯƠNG WIREFRAME DỰA THEO ẢNH GỬI) */
     .dashboard-container {
       display: none;
       width: 100vw;
@@ -236,9 +254,9 @@
       box-sizing: border-box;
       flex-direction: column;
       justify-content: space-between;
+      z-index: 999;
     }
 
-    /* TOP BAR */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -296,7 +314,6 @@
       color: #9ca3af;
     }
 
-    /* MAIN CONTENT AREA */
     .main-content {
       display: flex;
       gap: 20px;
@@ -374,7 +391,6 @@
       font-weight: bold;
     }
 
-    /* BOTTOM BAR */
     .bottom-bar {
       display: flex;
       justify-content: space-around;
@@ -418,6 +434,9 @@
     </div>
   </div>
 
+  <!-- NÚT XÓA LOCALSTORAGE BẰNG TAY DÙNG ĐỂ TEST -->
+  <button class="btn-reset-data" id="resetBtn" onclick="clearAllData()">🗑️ XÓA LOCALSTORAGE (RESET DATA)</button>
+
   <!-- 2. BẢNG ĐẶT TÊN NHÂN VẬT -->
   <div class="name-modal" id="nameModal">
     <div class="name-header">ENTER A NAME</div>
@@ -440,7 +459,7 @@
     </div>
   </div>
 
-  <!-- 3. TRANG CHỦ GAME (KHUNG XƯƠNG WIREFRAME DỰA THEO ẢNH GỬI) -->
+  <!-- 3. TRANG CHỦ GAME (KHUNG XƯƠNG WIREFRAME) -->
   <div class="dashboard-container" id="dashboard">
     <div class="top-bar">
       <div class="user-info-box">
@@ -460,7 +479,7 @@
       <div class="top-icons">
         <div class="icon-box">👥</div>
         <div class="icon-box">✉️</div>
-        <div class="icon-box">⚙️</div>
+        <div class="icon-box" onclick="clearAllData()" style="cursor: pointer;" title="Đăng xuất">⚙️</div>
       </div>
     </div>
 
@@ -500,44 +519,50 @@
     const REDIRECT_URI = encodeURIComponent(window.location.href.split('#')[0]);
 
     const BAD_WORDS = ['admin', 'hack', 'bitch', 'fuck', 'cc', 'cl', 'dm', 'dkm', 'sex'];
-    let usedNames = JSON.parse(localStorage.getItem('registered_names') || '["admin", "proplayer", "fc2026"]');
 
-    // Lưu trữ thông tin tài khoản đã đăng ký (Giả lập Lưu tài khoản Discord + Tên nhân vật)
-    let userProfiles = JSON.parse(localStorage.getItem('user_profiles') || '{}');
-    let currentUserId = localStorage.getItem('current_user_id') || null;
+    function getUsedNames() {
+      return JSON.parse(localStorage.getItem('registered_names') || '["admin", "proplayer"]');
+    }
+
+    function getUserProfiles() {
+      return JSON.parse(localStorage.getItem('user_profiles') || '{}');
+    }
 
     function loginWithDiscord() {
-      // Giả lập ID Discord người dùng sau khi ấn Login (để test logic kiểm tra đã có tên hay chưa)
-      const mockDiscordId = "discord_user_12345";
-      localStorage.setItem('current_user_id', mockDiscordId);
+      // Giả lập ID Discord người dùng
+      const currentDiscordId = "user_discord_888";
+      localStorage.setItem('current_user_id', currentDiscordId);
 
       const discordAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify%20email`;
-      
-      // Chuyển hướng tới Discord OAuth
       window.location.href = discordAuthUrl;
     }
 
-    // Tự động kiểm tra Token & Kiểm tra xem tài khoản đã tạo tên chưa
+    // Tự động kiểm tra trạng thái
     window.onload = function() {
       const fragment = new URLSearchParams(window.location.hash.slice(1));
       const accessToken = fragment.get('access_token');
+      const currentUserId = localStorage.getItem('current_user_id');
+      const userProfiles = getUserProfiles();
 
+      // Nếu đã có ID Discord hoặc quay lại từ Discord thành công
       if (accessToken || currentUserId) {
         document.getElementById('loginModal').style.display = 'none';
-        history.replaceState(null, null, window.location.pathname);
+        document.getElementById('resetBtn').style.display = 'none';
+        
+        // Xóa token trên URL cho sạch
+        if (accessToken) history.replaceState(null, null, window.location.pathname);
 
-        // Kiểm tra xem ID Discord này đã tạo tên trước đó chưa
+        // NẾU ĐÃ CÓ TÊN RỒI -> VÀO THẲNG TRANG CHỦ
         if (currentUserId && userProfiles[currentUserId]) {
-          // Nếu ĐÃ tạo tên rồi -> Vào thẳng Trang Chủ
           showDashboard(userProfiles[currentUserId]);
         } else {
-          // Nếu CHƯA tạo tên -> Hiện khung Đặt Tên
+          // NẾU CHƯA CÓ TÊN -> HIỆN POPUP ĐẶT TÊN
           document.getElementById('nameModal').style.display = 'block';
         }
       }
     };
 
-    // Lọc và kiểm tra điều kiện tên
+    // Kiểm tra tên nhập vào
     const nameInput = document.getElementById('usernameInput');
     const continueBtn = document.getElementById('continueBtn');
     const errorMsg = document.getElementById('errorMsg');
@@ -560,6 +585,7 @@
         return;
       }
 
+      const usedNames = getUsedNames();
       if (usedNames.includes(lowerName)) {
         showError('Tên này đã được người khác sử dụng!');
         setButtonState(false);
@@ -593,28 +619,43 @@
       }
     }
 
+    // Bấm nút CONTINUE để lưu tên và CHUYỂN TRỰC TIẾP VÀO TRANG CHỦ
     function submitName() {
       const finalName = nameInput.value.trim();
       if (finalName) {
+        // 1. Lưu tên vào danh sách đã dùng
+        let usedNames = getUsedNames();
         usedNames.push(finalName.toLowerCase());
         localStorage.setItem('registered_names', JSON.stringify(usedNames));
 
-        // Lưu tên gắn liền với tài khoản Discord hiện tại
-        if (!currentUserId) currentUserId = "discord_user_12345";
+        // 2. Gắn tên với ID Discord
+        let currentUserId = localStorage.getItem('current_user_id') || "user_discord_888";
+        localStorage.setItem('current_user_id', currentUserId);
+        
+        let userProfiles = getUserProfiles();
         userProfiles[currentUserId] = finalName;
         localStorage.setItem('user_profiles', JSON.stringify(userProfiles));
 
-        document.getElementById('nameModal').style.display = 'none';
+        // 3. Mở thẳng Trang Chủ Game
         showDashboard(finalName);
       }
     }
 
-    // Hiển thị khung xương Trang Chủ
+    // Hàm mở Trang Chủ
     function showDashboard(username) {
       document.getElementById('loginModal').style.display = 'none';
       document.getElementById('nameModal').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'none';
+
       document.getElementById('displayUsername').innerText = username.toUpperCase();
       document.getElementById('dashboard').style.display = 'flex';
+    }
+
+    // Hàm Xóa Sạch Data LocalStorage để Test lại
+    function clearAllData() {
+      localStorage.clear();
+      alert('Đã xóa sạch dữ liệu localStorage! Trang web sẽ tải lại.');
+      location.href = window.location.pathname;
     }
   </script>
 
