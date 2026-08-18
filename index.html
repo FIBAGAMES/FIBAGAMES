@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600;700&family=Work+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- AUTH MODAL (Màn hình Login / Register) -->
+  <!-- AUTH MODAL -->
   <div id="auth-modal" class="auth-overlay active">
     <div class="auth-card">
       <div class="auth-header">
@@ -18,16 +18,13 @@
         <p class="auth-subtitle">Đăng nhập tài khoản để lưu tiến trình game</p>
       </div>
 
-      <!-- TABS CHUYỂN ĐỔI LOGIN / REGISTER -->
       <div class="auth-tabs">
         <button id="tab-login-btn" class="auth-tab active" onclick="switchAuthTab('login')">ĐĂNG NHẬP</button>
         <button id="tab-register-btn" class="auth-tab" onclick="switchAuthTab('register')">ĐĂNG KÝ</button>
       </div>
 
-      <!-- THÔNG BÁO LỖI -->
       <div id="auth-error" class="auth-error-msg"></div>
 
-      <!-- FORM ĐĂNG NHẬP -->
       <form id="form-login" class="auth-form active" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label for="login-username">Tên tài khoản</label>
@@ -40,7 +37,6 @@
         <button type="submit" class="btn-auth-submit">ĐĂNG NHẬP NGAY</button>
       </form>
 
-      <!-- FORM ĐĂNG KÝ -->
       <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
         <div class="form-group">
           <label for="reg-username">Tên tài khoản mới</label>
@@ -56,6 +52,16 @@
         </div>
         <button type="submit" class="btn-auth-submit">TẠO TÀI KHOẢN</button>
       </form>
+    </div>
+  </div>
+
+  <!-- PLAYER DETAIL MODAL -->
+  <div id="player-modal" class="modal-overlay">
+    <div class="modal-content player-detail-card">
+      <button class="modal-close" onclick="closePlayerModal()">✕</button>
+      <div class="modal-body" id="player-modal-body">
+        <!-- Render chi tiết cầu thủ tại đây bằng JS -->
+      </div>
     </div>
   </div>
 
@@ -80,7 +86,6 @@
         </div>
       </div>
 
-      <!-- TÀI NGUYÊN (CURRENCIES) -->
       <div class="currency-bar">
         <div class="currency-item coins">
           <span class="currency-icon">🪙</span>
@@ -96,7 +101,6 @@
         </div>
       </div>
 
-      <!-- LOGOUT BUTTON -->
       <button class="btn-logout" onclick="handleLogout()" title="Đăng xuất">
         🚪 <span>Thoát</span>
       </button>
@@ -105,16 +109,13 @@
     <!-- MAIN VIEW CONTAINER -->
     <main class="main-content">
 
-      <!-- TRANG CHỦ (HOME SECTION) -->
+      <!-- TRANG CHỦ -->
       <section id="section-home" class="game-section active">
-        <!-- GAME BRANDING -->
         <div class="brand-header">
           <h1 class="game-title">ULTIMATE <span>FOOTBALL</span> WEB</h1>
         </div>
 
-        <!-- HERO BANNER GRID -->
         <div class="hero-grid">
-          <!-- BANNER SỰ KIỆN -->
           <div class="event-banner">
             <div class="banner-tag">SỰ KIỆN MỚI</div>
             <h2>MÙA GIẢI ULTIMATE TOTS</h2>
@@ -122,7 +123,6 @@
             <button class="btn-banner-action" onclick="switchSection('packs')">MỞ PACK NGAY</button>
           </div>
 
-          <!-- CẦU THỦ NỔI BẬT (FEATURED CARD) -->
           <div class="featured-player">
             <div class="card-title-tag">FEATURED ICON</div>
             
@@ -155,7 +155,6 @@
           </div>
         </div>
 
-        <!-- QUICK MENU TIỆN ÍCH -->
         <div class="quick-action-grid">
           <button class="btn-play-primary" onclick="switchSection('gameplay')">
             <div class="btn-glow"></div>
@@ -165,32 +164,78 @@
         </div>
       </section>
 
-      <!-- KHU VỰC THAY ĐỔI THEO MENU -->
+      <!-- ĐỘI HÌNH -->
       <section id="section-team" class="game-section">
         <h2 class="section-title">MY TEAM - ĐỘI HÌNH</h2>
         <div class="placeholder-box">Màn hình Quản lý Đội hình (Sẽ phát triển ở Bước 5)</div>
       </section>
 
+      <!-- KHO CẦU THỦ (INVENTORY) -->
       <section id="section-players" class="game-section">
-        <h2 class="section-title">MY PLAYERS - CẦU THỦ</h2>
-        <div class="placeholder-box">Kho Cầu Thủ (Sẽ phát triển ở Bước 3)</div>
+        <div class="inventory-header">
+          <h2 class="section-title">MY PLAYERS (<span id="inventory-count">0</span>)</h2>
+          
+          <!-- BỘ LỌC VÀ TÌM KIẾM -->
+          <div class="filter-bar">
+            <input type="text" id="inventory-search" placeholder="🔍 Tìm tên cầu thủ..." oninput="renderInventory()">
+            
+            <select id="filter-position" onchange="renderInventory()">
+              <option value="ALL">Tất cả Vị trí</option>
+              <option value="ST">ST - Tiền đạo cắm</option>
+              <option value="LW">LW - Tiền đạo trái</option>
+              <option value="RW">RW - Tiền đạo phải</option>
+              <option value="CAM">CAM - Tiền vệ công</option>
+              <option value="CM">CM - Tiền vệ trung tâm</option>
+              <option value="CDM">CDM - Tiền vệ phòng ngự</option>
+              <option value="CB">CB - Trung vệ</option>
+              <option value="LB">LB - Hậu vệ trái</option>
+              <option value="RB">RB - Hậu vệ phải</option>
+              <option value="GK">GK - Thủ môn</option>
+            </select>
+
+            <select id="filter-rarity" onchange="renderInventory()">
+              <option value="ALL">Tất cả Độ hiếm</option>
+              <option value="ICON">ICON</option>
+              <option value="LEGEND">LEGEND</option>
+              <option value="EPIC">EPIC</option>
+              <option value="RARE">RARE</option>
+              <option value="COMMON">COMMON</option>
+            </select>
+
+            <select id="sort-players" onchange="renderInventory()">
+              <option value="OVR_DESC">OVR: Cao -> Thấp</option>
+              <option value="OVR_ASC">OVR: Thấp -> Cao</option>
+              <option value="PRICE_DESC">Giá: Cao -> Thấp</option>
+              <option value="PRICE_ASC">Giá: Thấp -> Cao</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- GRID CẦU THỦ -->
+        <div id="inventory-grid" class="cards-grid">
+          <!-- Các thẻ cầu thủ sẽ tự động render bằng JavaScript -->
+        </div>
       </section>
 
+      <!-- PACKS -->
       <section id="section-packs" class="game-section">
         <h2 class="section-title">PACKS - CỬA HÀNG GÓI</h2>
         <div class="placeholder-box">Khu vực Mở Pack (Sẽ phát triển ở Bước 4)</div>
       </section>
 
+      <!-- MARKET -->
       <section id="section-market" class="game-section">
         <h2 class="section-title">TRANSFER MARKET - THỊ TRƯỜNG</h2>
         <div class="placeholder-box">Thị trường Chuyển nhượng (Sẽ phát triển ở Bước 6)</div>
       </section>
 
+      <!-- MISSIONS -->
       <section id="section-missions" class="game-section">
         <h2 class="section-title">DAILY MISSIONS - NHIỆM VỤ</h2>
         <div class="placeholder-box">Nhiệm vụ Hằng Ngày (Sẽ phát triển ở Bước 7)</div>
       </section>
 
+      <!-- GAMEPLAY -->
       <section id="section-gameplay" class="game-section">
         <h2 class="section-title">GAMEPLAY CANVAS</h2>
         <div class="placeholder-box">Sân bóng Canvas (Sẽ phát triển ở Bước 8)</div>
@@ -231,6 +276,8 @@
     </nav>
 
   </div>
+
+  <script src="players.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
