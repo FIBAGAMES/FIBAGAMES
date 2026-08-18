@@ -1,5 +1,5 @@
 /**
- * ULTIMATE FOOTBALL WEB - GAME ENGINE (STEP 4: PACK OPENING)
+ * ULTIMATE FOOTBALL WEB - GAME ENGINE (STEP 5: SQUAD MANAGEMENT)
  */
 
 const STORAGE_KEYS = {
@@ -17,11 +17,11 @@ const DEFAULT_GAME_DATA = {
   xp: 0,
   teamOvr: 75,
   players: [1, 2, 6, 15, 16, 20],
-  team: [1, 2, 6, 15, 16, 20],
+  team: [1, 2, 6, null, null, null, null, null, null, null, null], // 11 vị trí trên sân
   formation: "4-3-3"
 };
 
-// Cấu hình tỷ lệ Pack (Bước 4)
+// Cấu hình Tỷ lệ Pack
 const PACK_CONFIGS = {
   STANDARD: { name: "STANDARD PACK", costType: "coins", cost: 10000, rates: { COMMON: 70, RARE: 25, EPIC: 5, LEGEND: 0, ICON: 0 } },
   GOLD_COINS: { name: "GOLD PREMIUM PACK", costType: "coins", cost: 50000, rates: { COMMON: 0, RARE: 50, EPIC: 35, LEGEND: 14, ICON: 1 } },
@@ -29,16 +29,60 @@ const PACK_CONFIGS = {
   ULTIMATE_ICON: { name: "ULTIMATE ICON PACK", costType: "gems", cost: 500, rates: { COMMON: 0, RARE: 0, EPIC: 40, LEGEND: 45, ICON: 15 } }
 };
 
+// Cấu hình Tọa độ Sơ đồ Chiến thuật (BƯỚC 5)
+const FORMATIONS_CONFIG = {
+  "4-3-3": [
+    { pos: "GK", top: 88, left: 50 },
+    { pos: "LB", top: 72, left: 16 },
+    { pos: "CB", top: 74, left: 38 },
+    { pos: "CB", top: 74, left: 62 },
+    { pos: "RB", top: 72, left: 84 },
+    { pos: "CM", top: 48, left: 28 },
+    { pos: "CDM", top: 52, left: 50 },
+    { pos: "CM", top: 48, left: 72 },
+    { pos: "LW", top: 20, left: 20 },
+    { pos: "ST", top: 16, left: 50 },
+    { pos: "RW", top: 20, left: 80 }
+  ],
+  "4-4-2": [
+    { pos: "GK", top: 88, left: 50 },
+    { pos: "LB", top: 72, left: 16 },
+    { pos: "CB", top: 74, left: 38 },
+    { pos: "CB", top: 74, left: 62 },
+    { pos: "RB", top: 72, left: 84 },
+    { pos: "LM", top: 45, left: 16 },
+    { pos: "CM", top: 48, left: 38 },
+    { pos: "CM", top: 48, left: 62 },
+    { pos: "RM", top: 45, left: 84 },
+    { pos: "ST", top: 18, left: 35 },
+    { pos: "ST", top: 18, left: 65 }
+  ],
+  "3-5-2": [
+    { pos: "GK", top: 88, left: 50 },
+    { pos: "CB", top: 74, left: 25 },
+    { pos: "CB", top: 76, left: 50 },
+    { pos: "CB", top: 74, left: 75 },
+    { pos: "LWB", top: 48, left: 12 },
+    { pos: "CDM", top: 55, left: 35 },
+    { pos: "CAM", top: 38, left: 50 },
+    { pos: "CDM", top: 55, left: 65 },
+    { pos: "RWB", top: 48, left: 88 },
+    { pos: "ST", top: 18, left: 35 },
+    { pos: "ST", top: 18, left: 65 }
+  ]
+};
+
 let currentUser = null;
 let currentUserData = null;
 let pendingRevealedPlayer = null;
+let activeSlotIndexToPick = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
 function initApp() {
-  console.log("Ultimate Football Web - Step 4 Engine Ready");
+  console.log("Ultimate Football Web - Step 5 Squad Engine Ready");
   checkSession();
 }
 
@@ -59,7 +103,13 @@ function loadUserData(username) {
   const key = STORAGE_KEYS.GAME_DATA_PREFIX + username.toLowerCase();
   const data = localStorage.getItem(key);
   if (data) {
-    try { return JSON.parse(data); } catch (e) { return { ...DEFAULT_GAME_DATA }; }
+    try {
+      const parsed = JSON.parse(data);
+      if (!parsed.team || parsed.team.length !== 11) {
+        parsed.team = [1, 2, 6, null, null, null, null, null, null, null, null];
+      }
+      return parsed;
+    } catch (e) { return { ...DEFAULT_GAME_DATA }; }
   }
   return { ...DEFAULT_GAME_DATA };
 }
@@ -77,6 +127,7 @@ function checkSession() {
     currentUserData = loadUserData(currentUser);
     hideAuthModal();
     updateUIWithUserData();
+    renderSquadPitch();
     renderInventory();
   } else {
     showAuthModal();
@@ -136,6 +187,7 @@ async function handleRegister(event) {
   localStorage.setItem(STORAGE_KEYS.SESSION, username);
   hideAuthModal();
   updateUIWithUserData();
+  renderSquadPitch();
   renderInventory();
 }
 
@@ -160,6 +212,7 @@ async function handleLogin(event) {
 
   hideAuthModal();
   updateUIWithUserData();
+  renderSquadPitch();
   renderInventory();
 }
 
@@ -181,12 +234,151 @@ function hideAuthError() { document.getElementById('auth-error').style.display =
 
 function updateUIWithUserData() {
   if (!currentUserData) return;
+  
+  calculateAndUpdateTeamOVR();
+
   document.getElementById('user-name').innerText = currentUser;
   document.getElementById('user-level').innerText = `LV.${currentUserData.level || 1}`;
-  document.getElementById('team-ovr').innerText = currentUserData.teamOvr || 75;
   document.getElementById('coins-count').innerText = (currentUserData.coins || 0).toLocaleString('vi-VN');
   document.getElementById('gems-count').innerText = (currentUserData.gems || 0).toLocaleString('vi-VN');
   document.getElementById('energy-count').innerText = `${currentUserData.energy || 0}/${currentUserData.maxEnergy || 20}`;
+  
+  if (currentUserData.formation) {
+    document.getElementById('select-formation').value = currentUserData.formation;
+  }
+}
+
+// ==========================================
+// BƯỚC 5: SQUAD MANAGEMENT ENGINE & SÂN BÓNG
+// ==========================================
+
+function calculateAndUpdateTeamOVR() {
+  if (!currentUserData || !currentUserData.team) return;
+
+  const starterIds = currentUserData.team.filter(id => id !== null);
+  if (starterIds.length === 0) {
+    currentUserData.teamOvr = 0;
+  } else {
+    const totalOvr = starterIds.reduce((sum, id) => {
+      const p = PLAYERS_DATABASE.find(player => player.id === id);
+      return sum + (p ? p.overall : 0);
+    }, 0);
+    currentUserData.teamOvr = Math.round(totalOvr / starterIds.length);
+  }
+
+  document.getElementById('team-ovr').innerText = currentUserData.teamOvr;
+  const squadOvrEl = document.getElementById('squad-total-ovr');
+  if (squadOvrEl) squadOvrEl.innerText = currentUserData.teamOvr;
+}
+
+function renderSquadPitch() {
+  if (!currentUserData) return;
+
+  const formationKey = currentUserData.formation || "4-3-3";
+  const slotsConfig = FORMATIONS_CONFIG[formationKey] || FORMATIONS_CONFIG["4-3-3"];
+  const pitchContainer = document.getElementById('pitch-slots-container');
+
+  pitchContainer.innerHTML = '';
+
+  slotsConfig.forEach((slot, index) => {
+    const playerId = currentUserData.team[index];
+    const player = playerId ? PLAYERS_DATABASE.find(p => p.id === playerId) : null;
+
+    const slotDiv = document.createElement('div');
+    slotDiv.className = 'pitch-slot';
+    slotDiv.style.top = `${slot.top}%`;
+    slotDiv.style.left = `${slot.left}%`;
+    slotDiv.onclick = () => openPickerForSlot(index, slot.pos);
+
+    if (player) {
+      slotDiv.innerHTML = `
+        <div class="slot-card-preview filled">
+          <span class="slot-player-ovr">${player.overall}</span>
+          <img src="${player.image}" class="slot-player-img" alt="${player.name}">
+          <div class="slot-player-info">${player.name.split(' ').pop().toUpperCase()}</div>
+        </div>
+        <span class="slot-pos-badge">${slot.pos}</span>
+      `;
+    } else {
+      slotDiv.innerHTML = `
+        <div class="slot-card-preview">
+          <span class="slot-empty-icon">+</span>
+        </div>
+        <span class="slot-pos-badge">${slot.pos}</span>
+      `;
+    }
+
+    pitchContainer.appendChild(slotDiv);
+  });
+}
+
+function changeFormation(newFormation) {
+  currentUserData.formation = newFormation;
+  saveCurrentUserData();
+  renderSquadPitch();
+}
+
+function openPickerForSlot(slotIndex, posName) {
+  activeSlotIndexToPick = slotIndex;
+  const modal = document.getElementById('picker-modal');
+  const title = document.getElementById('picker-slot-title');
+  const grid = document.getElementById('picker-players-grid');
+
+  title.innerText = `CHỌN CẦU THỦ CHO VỊ TRÍ: ${posName}`;
+
+  // Lọc các cầu thủ đã sở hữu trong kho đồ
+  const ownedPlayers = currentUserData.players
+    .map(id => PLAYERS_DATABASE.find(p => p.id === id))
+    .filter(Boolean);
+
+  if (ownedPlayers.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 20px;">Bạn chưa có cầu thủ nào trong Kho!</div>`;
+  } else {
+    grid.innerHTML = ownedPlayers.map(p => {
+      const isAlreadyInTeam = currentUserData.team.includes(p.id);
+      const isCurrentSlotPlayer = currentUserData.team[slotIndex] === p.id;
+
+      return `
+        <div style="position: relative; cursor: pointer;" onclick="selectPlayerForSlot(${p.id})">
+          ${createCardHTML(p)}
+          ${isAlreadyInTeam ? `<div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--gold-primary); font-size: 14px;">${isCurrentSlotPlayer ? 'ĐANG ĐÁ' : 'ĐÃ ĐÁ VỊ TRÍ KHÁC'}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    // Nút bỏ trống vị trí
+    grid.innerHTML += `
+      <div onclick="selectPlayerForSlot(null)" style="width: 180px; height: 260px; border: 2px dashed rgba(239, 68, 68, 0.5); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #fca5a5; font-weight: 800;">
+        <span style="font-size: 32px;">❌</span>
+        <span>BỎ TRỐNG</span>
+      </div>
+    `;
+  }
+
+  modal.classList.add('active');
+}
+
+function selectPlayerForSlot(playerId) {
+  if (activeSlotIndexToPick === null) return;
+
+  // Nếu cầu thủ đã nằm ở slot khác -> Hoán đổi vị trí (Swap)
+  if (playerId !== null) {
+    const existingIndex = currentUserData.team.indexOf(playerId);
+    if (existingIndex !== -1 && existingIndex !== activeSlotIndexToPick) {
+      currentUserData.team[existingIndex] = currentUserData.team[activeSlotIndexToPick];
+    }
+  }
+
+  currentUserData.team[activeSlotIndexToPick] = playerId;
+  saveCurrentUserData();
+  calculateAndUpdateTeamOVR();
+  renderSquadPitch();
+  closePickerModal();
+}
+
+function closePickerModal() {
+  document.getElementById('picker-modal').classList.remove('active');
+  activeSlotIndexToPick = null;
 }
 
 // ==========================================
@@ -283,14 +475,13 @@ function openPlayerModal(playerId) {
 function closePlayerModal() { document.getElementById('player-modal').classList.remove('active'); }
 
 // ==========================================
-// BƯỚC 4: THUẬT TOÁN MỞ PACK & HOẠT HỌA REVEAL
+// PACK ENGINE
 // ==========================================
 
 function handleBuyPack(packTypeKey) {
   const config = PACK_CONFIGS[packTypeKey];
   if (!config) return;
 
-  // 1. Kiểm tra số dư Coins / Gems
   if (config.costType === 'coins' && currentUserData.coins < config.cost) {
     alert("Bạn không đủ Coins để mở gói này!");
     return;
@@ -300,32 +491,24 @@ function handleBuyPack(packTypeKey) {
     return;
   }
 
-  // 2. Trừ tiền và Lưu
   if (config.costType === 'coins') currentUserData.coins -= config.cost;
   if (config.costType === 'gems') currentUserData.gems -= config.cost;
   saveCurrentUserData();
   updateUIWithUserData();
 
-  // 3. Tính toán ngẫu nhiên Rarity theo Tỷ lệ Weighted Probability
   const chosenRarity = rollRarity(config.rates);
-
-  // 4. Lấy ngẫu nhiên cầu thủ thuộc Rarity đó
   const availablePlayers = PLAYERS_DATABASE.filter(p => p.rarity === chosenRarity);
   pendingRevealedPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
 
-  // 5. Khởi chạy Animation Mở Pack
   startPackOpeningAnimation(config.name);
 }
 
 function rollRarity(rates) {
   const randomNum = Math.random() * 100;
   let cumulative = 0;
-
   for (const [rarity, rate] of Object.entries(rates)) {
     cumulative += rate;
-    if (randomNum <= cumulative) {
-      return rarity;
-    }
+    if (randomNum <= cumulative) return rarity;
   }
   return "COMMON";
 }
@@ -340,7 +523,6 @@ function startPackOpeningAnimation(packTitle) {
   packBox.classList.remove('burst');
   packBox.style.display = 'flex';
   revealCard.classList.remove('show');
-
   overlay.classList.add('active');
 }
 
@@ -360,15 +542,12 @@ function triggerPackBurst() {
 
 function closePackOpening() {
   if (pendingRevealedPlayer) {
-    // Thêm cầu thủ vừa nhận vào kho đồ người chơi
     currentUserData.players.push(pendingRevealedPlayer.id);
     saveCurrentUserData();
     renderInventory();
     pendingRevealedPlayer = null;
   }
-
-  const overlay = document.getElementById('pack-opening-overlay');
-  overlay.classList.remove('active');
+  document.getElementById('pack-opening-overlay').classList.remove('active');
 }
 
 function switchSection(sectionId) {
@@ -384,6 +563,7 @@ function switchSection(sectionId) {
     if (btn.getAttribute('data-target') === sectionId) btn.classList.add('active');
   });
 
+  if (sectionId === 'team') renderSquadPitch();
   if (sectionId === 'players') renderInventory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
