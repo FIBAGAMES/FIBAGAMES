@@ -1,352 +1,424 @@
-// STATE GAME TỔNG THỂ
-let userState = {
-    coins: 1000,
-    gems: 50,
+/* ==========================================================================
+   FPC ULTIMATE 500 - GAME ENGINE & LOGIC HANDLER
+   ========================================================================== */
+
+// STATE MANAGEMENT
+const STATE = {
+    coins: 12450,
+    gems: 250,
     level: 1,
-    xp: 0,
-    ownedPlayerIds: [],
+    xp: 20,
+    collectedIds: new Set(),
     squad: {
         LW: null, ST: null, RW: null,
-        CAM: null, CM: null, CDM: null,
+        CM1: null, CAM: null, CM2: null,
         LB: null, CB1: null, CB2: null, RB: null,
         GK: null
-    }
+    },
+    quests: [
+        { id: 'q1', title: 'Pack Opener', desc: 'Roll 1 player pack', req: 1, current: 0, rewardCoins: 200, rewardXp: 50, claimed: false },
+        { id: 'q2', title: 'Squad Manager', desc: 'Place a player in your squad', req: 1, current: 0, rewardCoins: 300, rewardXp: 80, claimed: false },
+        { id: 'q3', title: 'Collector', desc: 'Collect 10 unique players', req: 10, current: 0, rewardCoins: 1000, rewardXp: 200, claimed: false }
+    ]
 };
 
-// KHỞI TẠO HỆ THỐNG
-document.addEventListener("DOMContentLoaded", () => {
-    loadGameState();
+// INITIALIZATION
+document.addEventListener('DOMContentLoaded', () => {
+    loadSavedData();
     initNavigation();
     initRollSystem();
-    initCollectionSystem();
-    initSquadSystem();
-    initNationsSystem();
-    initQuestsAndShop();
-    updateUIHeader();
+    initFilters();
+    initSquadBuilder();
+    updateUI();
 });
 
-// LƯU VÀ TẢI TỪ LOCALSTORAGE
-function saveGameState() {
-    localStorage.setItem("FPC_USER_STATE", JSON.stringify(userState));
-}
-
-function loadGameState() {
-    const saved = localStorage.getItem("FPC_USER_STATE");
+// LOCAL STORAGE PERSISTENCE
+function loadSavedData() {
+    const saved = localStorage.getItem('FPC_ULTIMATE_500_SAVE');
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
-            userState = { ...userState, ...parsed };
+            STATE.coins = parsed.coins ?? STATE.coins;
+            STATE.gems = parsed.gems ?? STATE.gems;
+            STATE.level = parsed.level ?? STATE.level;
+            STATE.xp = parsed.xp ?? STATE.xp;
+            STATE.collectedIds = new Set(parsed.collectedIds || []);
+            STATE.squad = parsed.squad || STATE.squad;
+            if (parsed.quests) STATE.quests = parsed.quests;
         } catch (e) {
-            console.error("Lỗi khi load state:", e);
+            console.error("Save data parse error", e);
         }
     }
 }
 
-function updateUIHeader() {
-    document.getElementById("user-coins").innerText = userState.coins.toLocaleString();
-    document.getElementById("user-gems").innerText = userState.gems.toLocaleString();
-    document.getElementById("user-level").innerText = userState.level;
-    document.getElementById("user-xp").innerText = userState.xp;
-    document.getElementById("col-count").innerText = userState.ownedPlayerIds.length;
+function saveData() {
+    const dataToSave = {
+        coins: STATE.coins,
+        gems: STATE.gems,
+        level: STATE.level,
+        xp: STATE.xp,
+        collectedIds: Array.from(STATE.collectedIds),
+        squad: STATE.squad,
+        quests: STATE.quests
+    };
+    localStorage.setItem('FPC_ULTIMATE_500_SAVE', JSON.stringify(dataToSave));
 }
 
-function addXP(amount) {
-    userState.xp += amount;
-    if (userState.xp >= userState.level * 100) {
-        userState.xp -= userState.level * 100;
-        userState.level += 1;
-        alert(`🎉 CHÚC MỪNG! BẠN ĐÃ LÊN LEVEL ${userState.level}!`);
-    }
-    updateUIHeader();
-    saveGameState();
+// UI UPDATE ENGINE
+function updateUI() {
+    // Currency HUD
+    document.getElementById('coins-count').innerText = STATE.coins.toLocaleString();
+    document.getElementById('gems-count').innerText = STATE.gems.toLocaleString();
+    document.getElementById('user-level').innerText = STATE.level;
+    document.getElementById('xp-fill').style.width = `${Math.min(100, (STATE.xp / (STATE.level * 100)) * 100)}%`;
+
+    // Collection stats
+    document.getElementById('collected-count').innerText = STATE.collectedIds.size;
+    document.getElementById('total-count').innerText = PLAYER_DATABASE.length;
+    const progressPercent = (STATE.collectedIds.size / PLAYER_DATABASE.length) * 100;
+    document.getElementById('collection-progress').style.width = `${progressPercent}%`;
+
+    // Render active views
+    renderCollectionGrid();
+    renderSquadPitch();
+    renderNations();
+    renderQuests();
+
+    saveData();
 }
 
-// KHỞI TẠO ĐIỀU HƯỚNG TAB
+// NAVIGATION TAB SYSTEM
 function initNavigation() {
-    const navBtns = document.querySelectorAll(".nav-btn");
-    navBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const tabTarget = btn.getAttribute("data-tab");
-            
-            document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    const navButtons = document.querySelectorAll('.nav-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
 
-            btn.classList.add("active");
-            document.getElementById(`tab-${tabTarget}`).classList.add("active");
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-tab');
 
-            if (tabTarget === "collection") renderCollection();
-            if (tabTarget === "squad") renderSquad();
-            if (tabTarget === "nations") renderNations();
+            navButtons.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(`tab-${targetTab}`).classList.add('active');
         });
     });
 }
 
-// TẠO THẺ CẦU THỦ HTML
-function createPlayerCardHTML(player, isLocked = false) {
-    const rarityClass = `rarity-${player.rarity.toLowerCase()}`;
-    const avatarUrl = player.image && player.image.trim() !== "" ? player.image : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=random&color=fff&size=128`;
-
-    return `
-        <div class="player-card ${rarityClass} ${isLocked ? 'locked' : ''}" data-id="${player.id}">
-            <div class="card-top">
-                <span class="card-ovr">${player.rating}</span>
-                <span class="card-pos">${player.position}</span>
-            </div>
-            <div class="card-avatar-wrap">
-                <img src="${avatarUrl}" alt="${player.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=333&color=fff'">
-            </div>
-            <div class="card-info">
-                <div class="card-name">${player.name}</div>
-                <div class="card-details">${player.nationality} • ${player.year}</div>
-                <div class="card-details">${player.club}</div>
-            </div>
-            <div class="card-rarity-tag">${player.rarity}</div>
-        </div>
-    `;
-}
-
-// HỆ THỐNG ROLL (CHIÊU MỘ)
+// PACK ROLL SYSTEM
 function initRollSystem() {
-    document.getElementById("btn-roll-1").addEventListener("click", () => performRoll(1, 100));
-    document.getElementById("btn-roll-10").addEventListener("click", () => performRoll(10, 950));
-    document.getElementById("btn-close-reveal").addEventListener("click", () => {
-        document.getElementById("special-reveal-modal").classList.add("hidden");
+    document.getElementById('btn-roll-1').addEventListener('click', () => executeRoll(1, 100));
+    document.getElementById('btn-roll-10').addEventListener('click', () => executeRoll(10, 950));
+    
+    document.getElementById('btn-close-reveal').addEventListener('click', () => {
+        document.getElementById('modal-roll-reveal').classList.remove('active');
+    });
+
+    document.getElementById('btn-close-ultimate').addEventListener('click', () => {
+        document.getElementById('modal-ultimate-99').classList.remove('active');
     });
 }
 
-function getRandomPlayerByWeight() {
-    // Tỷ lệ ngẫu nhiên trọng số để cầu thủ rating cao hiếm hơn
-    const rand = Math.random() * 100;
-    let targetRarity = "COMMON";
-
-    if (rand < 0.05) targetRarity = "ULTIMATE";      // 0.05%
-    else if (rand < 0.8) targetRarity = "ICON";        // 0.75%
-    else if (rand < 5.0) targetRarity = "LEGENDARY";   // 4.2%
-    else if (rand < 18.0) targetRarity = "LEGEND";     // 13%
-    else if (rand < 42.0) targetRarity = "EPIC";       // 24%
-    else if (rand < 72.0) targetRarity = "RARE";       // 30%
-    else targetRarity = "COMMON";                      // 28%
-
-    const pool = PLAYERS_DATABASE.filter(p => p.rarity === targetRarity);
-    if (pool.length === 0) return PLAYERS_DATABASE[Math.floor(Math.random() * PLAYERS_DATABASE.length)];
-    return pool[Math.floor(Math.random() * pool.length)];
-}
-
-function performRoll(count, cost) {
-    if (userState.coins < cost) {
-        alert("Bạn không đủ Coins để mở gói này!");
+function executeRoll(count, cost) {
+    if (STATE.coins < cost) {
+        alert("Not enough coins!");
         return;
     }
 
-    userState.coins -= cost;
-    addXP(count * 5);
-    updateUIHeader();
+    STATE.coins -= cost;
+    addXP(count * 15);
 
-    const resultsContainer = document.getElementById("roll-results-container");
-    resultsContainer.innerHTML = "";
+    // Track Quests
+    const q1 = STATE.quests.find(q => q.id === 'q1');
+    if (q1) q1.current += count;
 
-    let hasUltimate = false;
-    let ultimatePlayer = null;
+    const rolledPlayers = [];
+    let has99Ultimate = false;
 
     for (let i = 0; i < count; i++) {
-        const p = getRandomPlayerByWeight();
-        if (!userState.ownedPlayerIds.includes(p.id)) {
-            userState.ownedPlayerIds.push(p.id);
-        }
-        
-        if (p.rating === 99) {
-            hasUltimate = true;
-            ultimatePlayer = p;
-        }
-
-        resultsContainer.innerHTML += createPlayerCardHTML(p, false);
+        const player = getRandomPlayerByGacha();
+        rolledPlayers.push(player);
+        STATE.collectedIds.add(player.id);
+        if (player.rating === 99) has99Ultimate = true;
     }
 
-    saveGameState();
+    updateUI();
 
-    if (hasUltimate && ultimatePlayer) {
-        triggerSpecial99Reveal(ultimatePlayer);
+    if (has99Ultimate && count === 1) {
+        showUltimate99Modal(rolledPlayers[0]);
+    } else {
+        showRollRevealModal(rolledPlayers);
     }
 }
 
-function triggerSpecial99Reveal(player) {
-    const modal = document.getElementById("special-reveal-modal");
-    const cardContainer = document.getElementById("reveal-card-container");
-    cardContainer.innerHTML = createPlayerCardHTML(player, false);
-    modal.classList.remove("hidden");
+function getRandomPlayerByGacha() {
+    const rand = Math.random() * 100;
+    let targetRarity = 'COMMON';
+
+    if (rand < 0.5) targetRarity = 'ULTIMATE';     // 0.5%
+    else if (rand < 3) targetRarity = 'ICON';      // 2.5%
+    else if (rand < 8) targetRarity = 'LEGENDARY'; // 5%
+    else if (rand < 18) targetRarity = 'LEGEND';   // 10%
+    else if (rand < 35) targetRarity = 'EPIC';     // 17%
+    else if (rand < 60) targetRarity = 'RARE';     // 25%
+
+    const matching = PLAYER_DATABASE.filter(p => p.rarity === targetRarity);
+    if (matching.length > 0) {
+        return matching[Math.floor(Math.random() * matching.length)];
+    }
+    return PLAYER_DATABASE[Math.floor(Math.random() * PLAYER_DATABASE.length)];
 }
 
-// HỆ THỐNG COLLECTION (BỘ SƯU TẬP 500 PLAYERS)
-function initCollectionSystem() {
-    document.getElementById("search-player").addEventListener("input", renderCollection);
-    document.getElementById("filter-rarity").addEventListener("change", renderCollection);
-    document.getElementById("filter-position").addEventListener("change", renderCollection);
+function showRollRevealModal(players) {
+    const modal = document.getElementById('modal-roll-reveal');
+    const singleContainer = document.getElementById('reveal-single-container');
+    const multiContainer = document.getElementById('reveal-multi-container');
+
+    singleContainer.innerHTML = '';
+    multiContainer.innerHTML = '';
+
+    if (players.length === 1) {
+        singleContainer.appendChild(createFutCardHTML(players[0]));
+    } else {
+        players.forEach(p => {
+            multiContainer.appendChild(createFutCardHTML(p));
+        });
+    }
+
+    modal.classList.add('active');
 }
 
-function renderCollection() {
-    const grid = document.getElementById("collection-grid");
-    const search = document.getElementById("search-player").value.toLowerCase();
-    const rarity = document.getElementById("filter-rarity").value;
-    const posGroup = document.getElementById("filter-position").value;
+function showUltimate99Modal(player) {
+    const modal = document.getElementById('modal-ultimate-99');
+    const target = document.getElementById('ultimate-card-target');
+    target.innerHTML = '';
+    target.appendChild(createFutCardHTML(player));
+    modal.classList.add('active');
+}
 
-    const totalCount = PLAYERS_DATABASE.length; // Luôn luôn là 500
-    const ownedCount = userState.ownedPlayerIds.length;
-    const pct = Math.round((ownedCount / totalCount) * 100);
+// FUT CARD HTML CREATOR
+function createFutCardHTML(player, isLocked = false) {
+    const card = document.createElement('div');
+    card.className = `fut-card rarity-${player.rarity} ${isLocked ? 'locked' : ''}`;
 
-    document.getElementById("col-count").innerText = ownedCount;
-    document.getElementById("col-percent").innerText = `${pct}% (${ownedCount}/${totalCount})`;
-    document.getElementById("col-progress-bar").style.width = `${pct}%`;
+    card.innerHTML = `
+        <div class="fut-top">
+            <span class="fut-rating">${isLocked ? '??' : player.rating}</span>
+            <span class="fut-position">${player.position}</span>
+        </div>
+        <div class="fut-avatar-box">
+            <img class="fut-avatar-img" src="${player.image}" alt="${player.name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/166/166108.png'">
+        </div>
+        <div class="fut-bottom">
+            <div class="fut-name">${isLocked ? 'NOT COLLECTED' : player.name}</div>
+            <div class="fut-meta">
+                <span>${player.flag} ${player.nation}</span>
+            </div>
+            <div class="fut-rarity-badge">${player.rarity}</div>
+        </div>
+    `;
+    return card;
+}
 
-    grid.innerHTML = "";
-
-    PLAYERS_DATABASE.forEach(p => {
-        // Search Filter
-        const matchSearch = p.name.toLowerCase().includes(search) || 
-                            p.club.toLowerCase().includes(search) || 
-                            p.nationality.toLowerCase().includes(search);
-        
-        // Rarity Filter
-        const matchRarity = rarity === "ALL" || p.rarity === rarity;
-
-        // Position Filter
-        let matchPos = true;
-        if (posGroup === "GK") matchPos = p.position === "GK";
-        else if (posGroup === "DEF") matchPos = ["CB", "LB", "RB"].includes(p.position);
-        else if (posGroup === "MID") matchPos = ["CDM", "CM", "CAM", "LM", "RM"].includes(p.position);
-        else if (posGroup === "FW") matchPos = ["ST", "CF", "LW", "RW"].includes(p.position);
-
-        if (matchSearch && matchRarity && matchPos) {
-            const isOwned = userState.ownedPlayerIds.includes(p.id);
-            grid.innerHTML += createPlayerCardHTML(p, !isOwned);
-        }
+// COLLECTION GRID & FILTERS
+function initFilters() {
+    ['search-input', 'rarity-filter', 'position-filter', 'sort-filter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderCollectionGrid);
+        document.getElementById(id).addEventListener('keyup', renderCollectionGrid);
     });
 }
 
-// HỆ THỐNG ĐỘI HÌNH (SQUAD BEST XI)
-function initSquadSystem() {
-    document.getElementById("btn-autobuild").addEventListener("click", autoBuildBestSquad);
+function renderCollectionGrid() {
+    const grid = document.getElementById('collection-grid');
+    grid.innerHTML = '';
+
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const rarity = document.getElementById('rarity-filter').value;
+    const position = document.getElementById('position-filter').value;
+    const sort = document.getElementById('sort-filter').value;
+
+    let filtered = PLAYER_DATABASE.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(search) || p.nation.toLowerCase().includes(search);
+        const matchesRarity = rarity === 'ALL' || p.rarity === rarity;
+        const matchesPos = position === 'ALL' || p.position === position;
+        return matchesSearch && matchesRarity && matchesPos;
+    });
+
+    if (sort === 'RATING_DESC') filtered.sort((a, b) => b.rating - a.rating);
+    if (sort === 'RATING_ASC') filtered.sort((a, b) => a.rating - b.rating);
+    if (sort === 'NAME_ASC') filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+    filtered.forEach(p => {
+        const isCollected = STATE.collectedIds.has(p.id);
+        const cardElem = createFutCardHTML(p, !isCollected);
+        grid.appendChild(cardElem);
+    });
 }
 
-function renderSquad() {
-    let totalOvr = 0;
-    const slots = document.querySelectorAll(".squad-slot");
+// SQUAD BUILDER SYSTEM
+function initSquadBuilder() {
+    document.getElementById('btn-auto-squad').addEventListener('click', autoBuildSquad);
+    document.getElementById('btn-clear-squad').addEventListener('click', clearSquad);
+    document.getElementById('btn-close-squad-select').addEventListener('click', () => {
+        document.getElementById('modal-squad-select').classList.remove('active');
+    });
+}
+
+function renderSquadPitch() {
+    const slots = document.querySelectorAll('.squad-slot');
+    let totalRating = 0;
+    let placedCount = 0;
 
     slots.forEach(slot => {
-        const posTag = slot.getAttribute("data-pos");
-        const pId = userState.squad[posTag];
-        const cardSlot = slot.querySelector(".slot-card");
+        const posKey = slot.getAttribute('data-pos');
+        const holder = slot.querySelector('.slot-card-holder');
+        holder.innerHTML = '';
 
-        if (pId) {
-            const player = PLAYERS_DATABASE.find(p => p.id === pId);
+        const playerId = STATE.squad[posKey];
+        if (playerId) {
+            const player = PLAYER_DATABASE.find(p => p.id === playerId);
             if (player) {
-                cardSlot.innerHTML = createPlayerCardHTML(player, false);
-                totalOvr += player.rating;
-            } else {
-                cardSlot.innerHTML = `<div class="empty-slot">+ Chồng</div>`;
+                holder.appendChild(createFutCardHTML(player));
+                totalRating += player.rating;
+                placedCount++;
             }
-        } else {
-            cardSlot.innerHTML = `<div class="empty-slot">+ Chọn</div>`;
+        }
+
+        slot.onclick = () => openSquadSelector(posKey);
+    });
+
+    const squadOvr = placedCount > 0 ? Math.round(totalRating / 11) : 0;
+    document.getElementById('squad-ovr').innerText = squadOvr;
+}
+
+function openSquadSelector(posKey) {
+    const modal = document.getElementById('modal-squad-select');
+    const list = document.getElementById('squad-select-list');
+    list.innerHTML = '';
+
+    const collectedPlayers = PLAYER_DATABASE.filter(p => STATE.collectedIds.has(p.id));
+
+    collectedPlayers.forEach(p => {
+        const item = document.createElement('div');
+        item.style.cssText = "display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;";
+        item.innerHTML = `
+            <span><strong>${p.name}</strong> (${p.position}) - ${p.rating} OVR</span>
+            <button class="btn-gaming" style="min-width: auto; padding: 6px 12px;">SELECT</button>
+        `;
+        item.onclick = () => {
+            STATE.squad[posKey] = p.id;
+            modal.classList.remove('active');
+            updateUI();
+        };
+        list.appendChild(item);
+    });
+
+    modal.classList.add('active');
+}
+
+function autoBuildSquad() {
+    const collected = PLAYER_DATABASE.filter(p => STATE.collectedIds.has(p.id))
+                                     .sort((a, b) => b.rating - a.rating);
+
+    const positions = Object.keys(STATE.squad);
+    positions.forEach((pos, idx) => {
+        if (collected[idx]) {
+            STATE.squad[pos] = collected[idx].id;
         }
     });
 
-    document.getElementById("squad-total-ovr").innerText = totalOvr;
+    updateUI();
 }
 
-function autoBuildBestSquad() {
-    if (userState.ownedPlayerIds.length === 0) {
-        alert("Bạn chưa sở hữu cầu thủ nào! Hãy mở gói trước.");
-        return;
-    }
-
-    const ownedPlayers = PLAYERS_DATABASE.filter(p => userState.ownedPlayerIds.includes(p.id))
-                                         .sort((a,b) => b.rating - a.rating);
-
-    const positions = ["LW", "ST", "RW", "CAM", "CM", "CDM", "LB", "CB1", "CB2", "RB", "GK"];
-    const usedIds = new Set();
-
-    positions.forEach(pos => {
-        let basePos = pos.startsWith("CB") ? "CB" : pos;
-        let match = ownedPlayers.find(p => p.position === basePos && !usedIds.has(p.id));
-
-        if (!match) {
-            // Lấy cầu thủ tốt nhất còn lại bất kể vị trí
-            match = ownedPlayers.find(p => !usedIds.has(p.id));
-        }
-
-        if (match) {
-            userState.squad[pos] = match.id;
-            usedIds.add(match.id);
-        }
-    });
-
-    saveGameState();
-    renderSquad();
-    alert("Đã tự động tối ưu Đội Hình Mạnh Nhất!");
+function clearSquad() {
+    Object.keys(STATE.squad).forEach(key => STATE.squad[key] = null);
+    updateUI();
 }
 
-// HỆ THỐNG BỘ SƯU TẬP QUỐC GIA
-function initNationsSystem() {}
-
+// NATIONS & QUESTS RENDERING
 function renderNations() {
-    const container = document.getElementById("nations-list");
-    container.innerHTML = "";
+    const grid = document.getElementById('nations-grid');
+    grid.innerHTML = '';
 
-    const nationsMap = {};
-    PLAYERS_DATABASE.forEach(p => {
-        if (!nationsMap[p.nationality]) {
-            nationsMap[p.nationality] = { total: 0, owned: 0 };
-        }
-        nationsMap[p.nationality].total += 1;
-        if (userState.ownedPlayerIds.includes(p.id)) {
-            nationsMap[p.nationality].owned += 1;
-        }
-    });
+    const nations = [...new Set(PLAYER_DATABASE.map(p => p.nation))];
 
-    Object.keys(nationsMap).sort().forEach(nat => {
-        const data = nationsMap[nat];
-        const pct = Math.round((data.owned / data.total) * 100);
-        container.innerHTML += `
-            <div class="quest-card" style="margin-bottom: 10px;">
-                <div class="quest-info">
-                    <h4>🌐 ${nat}</h4>
-                    <p>Sở hữu: ${data.owned} / ${data.total} cầu thủ</p>
-                    <div class="progress-bar-bg" style="width: 200px;"><div class="progress-bar-fill" style="width: ${pct}%"></div></div>
+    nations.forEach(nat => {
+        const totalInNat = PLAYER_DATABASE.filter(p => p.nation === nat).length;
+        const collectedInNat = PLAYER_DATABASE.filter(p => p.nation === nat && STATE.collectedIds.has(p.id)).length;
+        const percent = Math.round((collectedInNat / totalInNat) * 100);
+        const samplePlayer = PLAYER_DATABASE.find(p => p.nation === nat);
+
+        const card = document.createElement('div');
+        card.className = `nation-card ${percent === 100 ? 'completed' : ''}`;
+        card.innerHTML = `
+            <div class="nation-info">
+                <span class="flag-icon">${samplePlayer ? samplePlayer.flag : '⚽'}</span>
+                <div>
+                    <div class="nation-name">${nat}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${collectedInNat} / ${totalInNat} Collected</div>
                 </div>
-                <strong style="color: var(--accent-gold);">${pct}%</strong>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" style="width: ${percent}%;"></div>
             </div>
         `;
+        grid.appendChild(card);
     });
 }
 
-// NHIỆM VỤ VÀ CỬA HÀNG
-function initQuestsAndShop() {
-    document.getElementById("claim-q1").addEventListener("click", () => {
-        userState.coins += 200;
-        addXP(10);
-        alert("Nhận +200 Coins!");
-    });
-    document.getElementById("claim-q2").addEventListener("click", () => {
-        userState.gems += 50;
-        addXP(25);
-        alert("Nhận +50 Gems!");
+function renderQuests() {
+    const container = document.getElementById('quests-list');
+    container.innerHTML = '';
+
+    STATE.quests.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'quest-card';
+        card.innerHTML = `
+            <div>
+                <div class="quest-title">${q.title}</div>
+                <div class="quest-desc">${q.desc} (${Math.min(q.current, q.req)}/${q.req})</div>
+            </div>
+            <button class="btn-gaming" ${q.claimed || q.current < q.req ? 'disabled style="opacity: 0.5;"' : ''} onclick="claimQuest('${q.id}')">
+                ${q.claimed ? 'CLAIMED' : 'CLAIM'}
+            </button>
+        `;
+        container.appendChild(card);
     });
 }
 
-function buyCoins(gemCost, coinReward) {
-    if (userState.gems < gemCost) {
-        alert("Không đủ Gems!");
-        return;
+function claimQuest(id) {
+    const q = STATE.quests.find(quest => quest.id === id);
+    if (q && !q.claimed && q.current >= q.req) {
+        q.claimed = true;
+        STATE.coins += q.rewardCoins;
+        addXP(q.rewardXp);
+        updateUI();
     }
-    userState.gems -= gemCost;
-    userState.coins += coinReward;
-    updateUIHeader();
-    saveGameState();
-    alert(`Thành công đổi ${gemCost} Gems lấy ${coinReward} Coins!`);
 }
 
-function buyGemsDirect() {
-    userState.gems += 100;
-    updateUIHeader();
-    saveGameState();
-    alert("Đã nạp thành công +100 Gems!");
+// SHOP HELPERS
+function buyCoins(gemCost, coinAmount) {
+    if (STATE.gems >= gemCost) {
+        STATE.gems -= gemCost;
+        STATE.coins += coinAmount;
+        updateUI();
+    } else {
+        alert("Not enough gems!");
+    }
+}
+
+function claimDailyGems() {
+    STATE.gems += 100;
+    updateUI();
+    alert("Claimed 100 Free Daily Gems!");
+}
+
+function addXP(amount) {
+    STATE.xp += amount;
+    const requiredXp = STATE.level * 100;
+    if (STATE.xp >= requiredXp) {
+        STATE.xp -= requiredXp;
+        STATE.level++;
+        STATE.gems += 50; // Level up reward
+    }
 }
