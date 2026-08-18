@@ -1,39 +1,78 @@
-/* ==========================================================================
-   CƠ SỞ DỮ LIỆU CẦU THỦ (PLAYERS DATABASE) - 100+ CẦU THỦ
-   ========================================================================== */
+/**
+ * ULTIMATE FOOTBALL WEB - PLAYER DATABASE (100 PLAYERS)
+ * Độ hiếm: COMMON (55%), RARE (30%), EPIC (10%), LEGEND (4%), ICON (1%)
+ */
 
 const PLAYERS_DATABASE = [
-  // --- HUYỀN THOẠI (ICON) ---
-  { id: "p1", name: "Pelé", ovr: 98, position: "ST", rarity: "ICON", club: "Brazil Legend", stats: { pace: 95, shooting: 97, passing: 93, dribbling: 96, defending: 55, physical: 82 } },
-  { id: "p2", name: "Diego Maradona", ovr: 97, position: "CAM", rarity: "ICON", club: "Argentina Legend", stats: { pace: 92, shooting: 93, passing: 95, dribbling: 98, defending: 45, physical: 78 } },
-  { id: "p3", name: "Zinedine Zidane", ovr: 96, position: "CAM", rarity: "ICON", club: "France Legend", stats: { pace: 85, shooting: 90, passing: 96, dribbling: 95, defending: 75, physical: 85 } },
-  { id: "p4", name: "Ronaldo Nazário", ovr: 96, position: "ST", rarity: "ICON", club: "Brazil Legend", stats: { pace: 97, shooting: 95, passing: 81, dribbling: 95, defending: 45, physical: 80 } },
-  { id: "p5", name: "Paolo Maldini", ovr: 95, position: "CB", rarity: "ICON", club: "AC Milan Legend", stats: { pace: 86, shooting: 56, passing: 75, dribbling: 70, defending: 97, physical: 88 } },
-  { id: "p6", name: "Lev Yashin", ovr: 94, position: "GK", rarity: "ICON", club: "Russia Legend", stats: { pace: 93, shooting: 90, passing: 88, dribbling: 94, defending: 95, physical: 90 } },
-  { id: "p7", name: "Ronaldinho", ovr: 94, position: "LW", rarity: "ICON", club: "Brazil Legend", stats: { pace: 91, shooting: 89, passing: 91, dribbling: 97, defending: 40, physical: 79 } },
-  { id: "p8", name: "Johan Cruyff", ovr: 95, position: "CF", rarity: "ICON", club: "Netherlands Legend", stats: { pace: 91, shooting: 92, passing: 91, dribbling: 94, defending: 42, physical: 73 } },
+  // --- ICON (1%) ---
+  { id: 1, name: "Leo Santoro", country: "🇮🇹", position: "RW", overall: 94, pace: 96, shooting: 91, passing: 90, dribbling: 97, defending: 40, physical: 78, rarity: "ICON", price: 5000000, image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop&q=80" },
 
-  // --- CẦU THỦ ĐẶC BIỆT / SIÊU SAO (SPECIAL / GOLD HIGH) ---
-  { id: "p9", name: "Lionel Messi", ovr: 93, position: "RW", rarity: "SPECIAL", club: "Inter Miami", stats: { pace: 85, shooting: 92, passing: 94, dribbling: 95, defending: 35, physical: 65 } },
-  { id: "p10", name: "Cristiano Ronaldo", ovr: 91, position: "ST", rarity: "SPECIAL", club: "Al Nassr", stats: { pace: 82, shooting: 93, passing: 78, dribbling: 84, defending: 34, physical: 77 } },
-  { id: "p11", name: "Kylian Mbappé", ovr: 92, position: "ST", rarity: "SPECIAL", club: "Real Madrid", stats: { pace: 97, shooting: 90, passing: 80, dribbling: 92, defending: 36, physical: 78 } },
-  { id: "p12", name: "Erling Haaland", ovr: 91, position: "ST", rarity: "SPECIAL", club: "Manchester City", stats: { pace: 89, shooting: 93, passing: 66, dribbling: 80, defending: 45, physical: 88 } },
-  { id: "p13", name: "Kevin De Bruyne", ovr: 91, position: "CM", rarity: "SPECIAL", club: "Manchester City", stats: { pace: 72, shooting: 88, passing: 94, dribbling: 87, defending: 65, physical: 78 } },
-  { id: "p14", name: "Jude Bellingham", ovr: 90, position: "CAM", rarity: "SPECIAL", club: "Real Madrid", stats: { pace: 82, shooting: 86, passing: 85, dribbling: 88, defending: 78, physical: 85 } },
-  { id: "p15", name: "Virgil van Dijk", ovr: 89, position: "CB", rarity: "SPECIAL", club: "Liverpool", stats: { pace: 78, shooting: 60, passing: 71, dribbling: 72, defending: 91, physical: 89 } },
-  { id: "p16", name: "Thibaut Courtois", ovr: 89, position: "GK", rarity: "SPECIAL", club: "Real Madrid", stats: { pace: 85, shooting: 89, passing: 76, dribbling: 90, defending: 88, physical: 88 } },
-  { id: "p17", name: "Mohamed Salah", ovr: 89, position: "RW", rarity: "GOLD", club: "Liverpool", stats: { pace: 89, shooting: 87, passing: 81, dribbling: 88, defending: 45, physical: 75 } },
-  { id: "p18", name: "Vinícius Júnior", ovr: 89, position: "LW", rarity: "GOLD", club: "Real Madrid", stats: { pace: 95, shooting: 82, passing: 78, dribbling: 90, defending: 29, physical: 68 } },
+  // --- LEGEND (4%) ---
+  { id: 2, name: "Alex Moretti", country: "🇮🇹", position: "ST", overall: 91, pace: 92, shooting: 94, passing: 82, dribbling: 89, defending: 35, physical: 85, rarity: "LEGEND", price: 2500000, image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" },
+  { id: 3, name: "Daniel Kovac", country: "🇭🇷", position: "CM", overall: 90, pace: 84, shooting: 85, passing: 93, dribbling: 91, defending: 78, physical: 80, rarity: "LEGEND", price: 2200000, image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+  { id: 4, name: "Marco Silva", country: "🇧🇷", position: "CAM", overall: 89, pace: 88, shooting: 87, passing: 91, dribbling: 93, defending: 45, physical: 72, rarity: "LEGEND", price: 1900000, image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80" },
+  { id: 5, name: "Adrian Costa", country: "🇪🇸", position: "CB", overall: 88, pace: 80, shooting: 45, passing: 75, dribbling: 72, defending: 92, physical: 90, rarity: "LEGEND", price: 1700000, image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&auto=format&fit=crop&q=80" },
 
-  // --- CẦU THỦ THƯỜNG / KHỞI ĐẦU (GOLD / BRONZE) ---
-  { id: "p19", name: "Harry Kane", ovr: 90, position: "ST", rarity: "GOLD", club: "Bayern Munich", stats: { pace: 69, shooting: 93, passing: 84, dribbling: 83, defending: 49, physical: 82 } },
-  { id: "p20", name: "Rodri", ovr: 89, position: "CDM", rarity: "GOLD", club: "Manchester City", stats: { pace: 58, shooting: 73, passing: 80, dribbling: 79, defending: 87, physical: 84 } },
-  { id: "p21", name: "Bruno Fernandes", ovr: 88, position: "CAM", rarity: "GOLD", club: "Manchester United", stats: { pace: 75, shooting: 86, passing: 88, dribbling: 83, defending: 68, physical: 77 } },
-  { id: "p22", name: "Ruben Dias", ovr: 88, position: "CB", rarity: "GOLD", club: "Manchester City", stats: { pace: 62, shooting: 39, passing: 66, dribbling: 68, defending: 89, physical: 87 } },
-  { id: "p23", name: "Trent Alexander-Arnold", ovr: 86, position: "RB", rarity: "GOLD", club: "Liverpool", stats: { pace: 76, shooting: 69, passing: 90, dribbling: 80, defending: 80, physical: 73 } },
-  { id: "p24", name: "Alphonso Davies", ovr: 84, position: "LB", rarity: "GOLD", club: "Bayern Munich", stats: { pace: 95, shooting: 66, passing: 77, dribbling: 84, defending: 76, physical: 76 } },
-  { id: "p25", name: "Bukayo Saka", ovr: 86, position: "RW", rarity: "GOLD", club: "Arsenal", stats: { pace: 85, shooting: 81, passing: 82, dribbling: 86, defending: 65, physical: 74 } },
-  { id: "p26", name: "Pedri", ovr: 86, position: "CM", rarity: "GOLD", club: "Barcelona", stats: { pace: 78, shooting: 68, passing: 85, dribbling: 88, defending: 68, physical: 65 } },
-  { id: "p27", name: "Declan Rice", ovr: 86, position: "CDM", rarity: "GOLD", club: "Arsenal", stats: { pace: 73, shooting: 66, passing: 78, dribbling: 79, defending: 85, physical: 83 } },
-  { id: "p28", name: "Gianluigi Donnarumma", ovr: 87, position: "GK", rarity: "GOLD", club: "PSG", stats: { pace: 88, shooting: 83, passing: 75, dribbling: 89, defending: 86, physical: 85 } }
+  // --- EPIC (10%) ---
+  { id: 6, name: "Mateo Rossi", country: "🇮🇹", position: "LW", overall: 87, pace: 91, shooting: 85, passing: 82, dribbling: 88, defending: 38, physical: 74, rarity: "EPIC", price: 900000, image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop&q=80" },
+  { id: 7, name: "Lucas Vance", country: "🇬🇧", position: "CDM", overall: 86, pace: 78, shooting: 70, passing: 84, dribbling: 80, defending: 87, physical: 88, rarity: "EPIC", price: 800000, image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&auto=format&fit=crop&q=80" },
+  { id: 8, name: "Gabriel Santos", country: "🇧🇷", position: "ST", overall: 86, pace: 89, shooting: 88, passing: 76, dribbling: 85, defending: 32, physical: 81, rarity: "EPIC", price: 820000, image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&auto=format&fit=crop&q=80" },
+  { id: 9, name: "Hugo Blanc", country: "🇫🇷", position: "GK", overall: 85, pace: 50, shooting: 20, passing: 65, dribbling: 40, defending: 88, physical: 82, rarity: "EPIC", price: 750000, image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&auto=format&fit=crop&q=80" },
+  { id: 10, name: "Lars Eriksson", country: "🇸🇪", position: "RB", overall: 85, pace: 88, shooting: 68, passing: 80, dribbling: 81, defending: 82, physical: 84, rarity: "EPIC", price: 720000, image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80" },
+  { id: 11, name: "Kenji Sato", country: "🇯🇵", position: "RM", overall: 84, pace: 90, shooting: 79, passing: 83, dribbling: 86, defending: 55, physical: 68, rarity: "EPIC", price: 680000, image: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=300&auto=format&fit=crop&q=80" },
+  { id: 12, name: "Carlos Santana", country: "🇦🇷", position: "CAM", overall: 84, pace: 82, shooting: 84, passing: 86, dribbling: 87, defending: 42, physical: 70, rarity: "EPIC", price: 650000, image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80" },
+  { id: 13, name: "Ivan Petrov", country: "🇷🇺", position: "CB", overall: 83, pace: 74, shooting: 40, passing: 68, dribbling: 65, defending: 85, physical: 89, rarity: "EPIC", price: 600000, image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" },
+  { id: 14, name: "Pablo Ramos", country: "🇲🇽", position: "LB", overall: 82, pace: 86, shooting: 65, passing: 78, dribbling: 80, defending: 80, physical: 78, rarity: "EPIC", price: 550000, image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+
+  // --- RARE (30%) ---
+  { id: 15, name: "David O'Connor", country: "🇮🇪", position: "CM", overall: 81, pace: 76, shooting: 75, passing: 82, dribbling: 80, defending: 76, physical: 80, rarity: "RARE", price: 350000, image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80" },
+  { id: 16, name: "Milan Horvat", country: "🇸🇮", position: "ST", overall: 80, pace: 82, shooting: 83, passing: 70, dribbling: 78, defending: 30, physical: 82, rarity: "RARE", price: 300000, image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=300&auto=format&fit=crop&q=80" },
+  { id: 17, name: "Jae-Jin Park", country: "🇰🇷", position: "LM", overall: 80, pace: 87, shooting: 74, passing: 78, dribbling: 82, defending: 50, physical: 68, rarity: "RARE", price: 310000, image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop&q=80" },
+  { id: 18, name: "Tariq Al-Mansoor", country: "🇸🇦", position: "RW", overall: 79, pace: 88, shooting: 76, passing: 74, dribbling: 81, defending: 35, physical: 65, rarity: "RARE", price: 280000, image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&auto=format&fit=crop&q=80" },
+  { id: 19, name: "Kwesi Mensah", country: "🇬🇭", position: "CDM", overall: 79, pace: 78, shooting: 62, passing: 75, dribbling: 74, defending: 81, physical: 85, rarity: "RARE", price: 270000, image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&auto=format&fit=crop&q=80" },
+  { id: 20, name: "Fernando Gomez", country: "🇨🇱", position: "CB", overall: 78, pace: 72, shooting: 38, passing: 65, dribbling: 62, defending: 81, physical: 83, rarity: "RARE", price: 240000, image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&auto=format&fit=crop&q=80" },
+  { id: 21, name: "Stefan Popa", country: "🇷🇴", position: "GK", overall: 78, pace: 45, shooting: 18, passing: 60, dribbling: 35, defending: 80, physical: 78, rarity: "RARE", price: 230000, image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80" },
+  { id: 22, name: "Andrej Novak", country: "🇸lovakia", position: "CAM", overall: 77, pace: 76, shooting: 75, passing: 80, dribbling: 79, defending: 40, physical: 68, rarity: "RARE", price: 210000, image: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=300&auto=format&fit=crop&q=80" },
+  { id: 23, name: "Oscar Lindqvist", country: "🇫🇮", position: "LB", overall: 77, pace: 82, shooting: 60, passing: 72, dribbling: 74, defending: 76, physical: 75, rarity: "RARE", price: 200000, image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80" },
+  { id: 24, name: "Liam Gallagher", country: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", position: "ST", overall: 76, pace: 80, shooting: 78, passing: 65, dribbling: 73, defending: 32, physical: 80, rarity: "RARE", price: 190000, image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" },
+  { id: 25, name: "Noah Bennett", country: "🇦🇺", position: "RB", overall: 76, pace: 83, shooting: 58, passing: 70, dribbling: 72, defending: 75, physical: 76, rarity: "RARE", price: 180000, image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+  { id: 26, name: "Ethan Hawke", country: "🇨🇦", position: "LW", overall: 75, pace: 86, shooting: 72, passing: 70, dribbling: 78, defending: 35, physical: 66, rarity: "RARE", price: 170000, image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80" }
 ];
+
+(function generateFull100Players() {
+  const positions = ["ST", "LW", "RW", "CAM", "CM", "CDM", "LM", "RM", "CB", "LB", "RB", "GK"];
+  const countries = ["🇻🇳", "🇧🇷", "🇦🇷", "🇫🇷", "🇪🇸", "🇩🇪", "🇮🇹", "🇵🇹", "🇳🇱", "🇪🇳", "🇯🇵", "🇰🇷"];
+  const firstNames = ["Minh", "Quang", "Anh", "Bruno", "Diego", "Jean", "Klaus", "Sandro", "Pedro", "Robin", "Ken", "Dong"];
+  const lastNames = ["Nguyen", "Tran", "Silva", "Gomez", "Dupont", "Muller", "Conti", "Ferreira", "Van Dijk", "Tanaka", "Kim"];
+
+  let currentId = PLAYERS_DATABASE.length + 1;
+
+  while (currentId <= 100) {
+    let rarity = "COMMON";
+    let ovr = Math.floor(Math.random() * 10) + 64;
+    let price = ovr * 1500;
+
+    const name = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+    const pos = positions[Math.floor(Math.random() * positions.length)];
+    const country = countries[Math.floor(Math.random() * countries.length)];
+
+    PLAYERS_DATABASE.push({
+      id: currentId,
+      name: name,
+      country: country,
+      position: pos,
+      overall: ovr,
+      pace: Math.floor(Math.random() * 30) + 60,
+      shooting: Math.floor(Math.random() * 30) + 55,
+      passing: Math.floor(Math.random() * 30) + 55,
+      dribbling: Math.floor(Math.random() * 30) + 60,
+      defending: Math.floor(Math.random() * 30) + 50,
+      physical: Math.floor(Math.random() * 30) + 55,
+      rarity: rarity,
+      price: price,
+      image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop&q=80"
+    });
+
+    currentId++;
+  }
+})();
