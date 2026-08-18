@@ -21,12 +21,6 @@
     --rarity-legend: #f0883e;
     --rarity-icon: #e3b341;
     --rarity-ultimate: #ff0055;
-
-    /* Chemistry Link Colors */
-    --chem-none: #da3633;
-    --chem-weak: #d29922;
-    --chem-strong: #238636;
-    --chem-hyper: #a371f7;
 }
 
 * {
@@ -369,20 +363,6 @@ body {
     border-radius: 4px;
 }
 
-/* CARD CHEMISTRY INDIVIDUAL BADGE */
-.card-chem-badge {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(0,0,0,0.85);
-    border: 1px solid var(--accent);
-    color: #a371f7;
-    font-size: 0.65rem;
-    font-weight: bold;
-    padding: 2px 5px;
-    border-radius: 4px;
-}
-
 /* RARITY CARD STYLES */
 .player-card.COMMON { border-color: var(--rarity-common); }
 .player-card.RARE { border-color: var(--rarity-rare); background: linear-gradient(135deg, #161b22, #1f2a3a); }
@@ -440,12 +420,6 @@ body {
     font-size: 2.2rem;
     font-weight: 900;
     color: var(--gold);
-}
-
-.chem-highlight {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--accent);
 }
 
 .progress-bar-bg {
@@ -552,38 +526,23 @@ body {
     margin-bottom: 20px;
 }
 
-.squad-stats-group {
-    display: flex;
-    gap: 15px;
-}
-
-.squad-rating-box, .squad-chem-box {
+.squad-rating-box {
     background: var(--bg-panel);
     border: 2px solid var(--gold);
     border-radius: 10px;
-    padding: 10px 20px;
+    padding: 10px 25px;
     text-align: center;
 }
 
-.squad-chem-box {
-    border-color: var(--accent);
-}
-
-.squad-rating-box span, .squad-chem-box span {
+.squad-rating-box span {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
 
 #squad-rating-display {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 900;
     color: var(--gold);
-}
-
-#squad-chem-display {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: var(--accent);
 }
 
 .squad-actions {
