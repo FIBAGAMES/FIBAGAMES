@@ -3,203 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Player Collector - 500 Ultimate Database</title>
+    <title>Football Player Collector - 500 Players Edition</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <header class="navbar">
-        <div class="logo">
-            <h1>FOOTBALL <span>COLLECTOR</span></h1>
+    <div id="particle-canvas-container"></div>
+
+    <header class="game-header">
+        <div class="logo-container">
+            <i class="fa-solid fa-trophy glow-icon"></i>
+            <h1>FPC <span>ULTIMATE 500</span></h1>
         </div>
         <div class="user-stats">
-            <div class="stat-box coins">
-                <span class="icon">🪙</span>
-                <span id="coins-display">1,000</span>
-            </div>
-            <div class="stat-box gems">
-                <span class="icon">💎</span>
-                <span id="gems-display">50</span>
-            </div>
-            <div class="stat-box level">
-                <span class="icon">⭐</span>
-                <span>Lv. <span id="level-display">1</span></span>
-                <div class="xp-bar-mini">
-                    <div id="xp-fill" class="xp-fill" style="width: 0%;"></div>
-                </div>
-            </div>
+            <div class="stat-badge coins"><i class="fa-solid fa-coins"></i> <span id="user-coins">1,000</span></div>
+            <div class="stat-badge gems"><i class="fa-solid fa-gem"></i> <span id="user-gems">50</span></div>
+            <div class="stat-badge level"><i class="fa-solid fa-star"></i> LV <span id="user-level">1</span> (<span id="user-xp">0</span> XP)</div>
         </div>
     </header>
 
-    <!-- Main Navigation Tabs -->
-    <nav class="tab-menu">
-        <button class="tab-btn active" data-tab="roll-section">🎲 Gacha Roll</button>
-        <button class="tab-btn" data-tab="collection-section">📖 Collection (<span id="coll-count">0</span>/500)</button>
-        <button class="tab-btn" data-tab="squad-section">⚽ Squad (Best XI)</button>
-        <button class="tab-btn" data-tab="nations-section">🌍 National Teams</button>
-        <button class="tab-btn" data-tab="quests-section">📋 Quests & Login</button>
-        <button class="tab-btn" data-tab="shop-section">🛒 Shop</button>
-        <button class="tab-btn" data-tab="leaderboard-section">🏆 Leaderboard</button>
+    <nav class="main-nav">
+        <button class="nav-btn active" data-tab="roll"><i class="fa-solid fa-dice"></i> Chiêu Mộ</button>
+        <button class="nav-btn" data-tab="collection"><i class="fa-solid fa-book-open"></i> Bộ Sưu Tập (<span id="col-count">0</span>/500)</button>
+        <button class="nav-btn" data-tab="squad"><i class="fa-solid fa-shield-halved"></i> Đội Hình Best XI</button>
+
+        <button class="nav-btn" data-tab="nations"><i class="fa-solid fa-globe"></i> Quốc Gia</button>
+        <button class="nav-btn" data-tab="quests"><i class="fa-solid fa-list-check"></i> Nhiệm Vụ</button>
+        <button class="nav-btn" data-tab="shop"><i class="fa-solid fa-store"></i> Cửa Hàng</button>
     </nav>
 
-    <main class="content-container">
-        <!-- 1. ROLL SECTION -->
-        <section id="roll-section" class="tab-content active">
-            <div class="gacha-banner">
-                <h2>ULTIMATE PACK OPENING</h2>
-                <p>Roll to discover 500 legendary and modern players from 1958 to 2026!</p>
-                <div class="rates-info">
-                    <span class="rate common">70-74: Common</span>
-                    <span class="rate rare">75-79: Rare</span>
-                    <span class="rate epic">80-84: Epic</span>
-                    <span class="rate legend">85-89: Legend</span>
-                    <span class="rate legendary">90-94: Legendary</span>
-                    <span class="rate icon">95-98: Icon</span>
-                    <span class="rate ultimate">99: ULTIMATE 🔥</span>
-                </div>
-                <div class="roll-buttons">
-                    <button id="roll-1-btn" class="btn btn-primary">Roll x1 (100 🪙)</button>
-                    <button id="roll-10-btn" class="btn btn-accent">Roll x10 (900 🪙)</button>
-                </div>
-            </div>
-
-            <!-- Roll Reveal Modal / Stage -->
-            <div id="roll-modal" class="modal hidden">
-                <div class="modal-overlay"></div>
-                <div class="modal-content">
-                    <div id="special-reveal-banner" class="special-reveal hidden">
-                        🔥 99 RATED! 🔥<br><span>ULTIMATE PLAYER</span>
+    <main class="content-area">
+        <!-- TAB ROLL -->
+        <section id="tab-roll" class="tab-content active">
+            <div class="banner-container">
+                <div class="banner-card rarity-ultimate">
+                    <h2>GÓI CẦU THỦ HUYỀN THOẠI 500</h2>
+                    <p>Sở hữu các siêu sao huyền thoại từ rating 70 đến ULTIMATE 99 OVR!</p>
+                    <div class="pack-visual">
+                        <i class="fa-solid fa-box-open pack-icon"></i>
                     </div>
-                    <div id="roll-cards-container" class="cards-grid"></div>
-                    <button id="close-roll-btn" class="btn btn-secondary">Collect & Close</button>
+                    <div class="roll-actions">
+                        <button id="btn-roll-1" class="btn-primary"><i class="fa-solid fa-coins"></i> Mở x1 (100 Coins)</button>
+                        <button id="btn-roll-10" class="btn-special"><i class="fa-solid fa-bolt"></i> Mở x10 (950 Coins)</button>
+                    </div>
                 </div>
             </div>
+            <div id="roll-results-container" class="roll-results"></div>
         </section>
 
-        <!-- 2. COLLECTION SECTION -->
-        <section id="collection-section" class="tab-content">
-            <div class="section-header">
-                <h2>PLAYER COLLECTION</h2>
-                <div class="filter-controls">
-                    <input type="text" id="search-input" placeholder="Search player, nation, club...">
-                    <select id="rarity-filter">
-                        <option value="ALL">All Rarities</option>
-                        <option value="COMMON">COMMON (70-74)</option>
-                        <option value="RARE">RARE (75-79)</option>
-                        <option value="EPIC">EPIC (80-84)</option>
-                        <option value="LEGEND">LEGEND (85-89)</option>
-                        <option value="LEGENDARY">LEGENDARY (90-94)</option>
-                        <option value="ICON">ICON (95-98)</option>
-                        <option value="ULTIMATE">ULTIMATE (99)</option>
-                    </select>
-                </div>
+        <!-- TAB COLLECTION -->
+        <section id="tab-collection" class="tab-content">
+            <div class="filter-bar">
+                <input type="text" id="search-player" placeholder="Tìm tên cầu thủ, CLB, quốc gia...">
+                <select id="filter-rarity">
+                    <option value="ALL">Tất cả Rarity</option>
+                    <option value="COMMON">COMMON (70-74)</option>
+                    <option value="RARE">RARE (75-79)</option>
+                    <option value="EPIC">EPIC (80-84)</option>
+                    <option value="LEGEND">LEGEND (85-89)</option>
+                    <option value="LEGENDARY">LEGENDARY (90-94)</option>
+                    <option value="ICON">ICON (95-98)</option>
+                    <option value="ULTIMATE">ULTIMATE (99)</option>
+                </select>
+                <select id="filter-position">
+                    <option value="ALL">Tất cả Vị Tri</option>
+                    <option value="GK">Thủ môn (GK)</option>
+                    <option value="DEF">Hậu vệ (CB, LB, RB)</option>
+                    <option value="MID">Tiền vệ (CDM, CM, CAM, LM, RM)</option>
+                    <option value="FW">Tiền đạo (ST, CF, LW, RW)</option>
+                </select>
             </div>
-            <div id="collection-grid" class="cards-grid"></div>
+            <div class="collection-stats">
+                <span>Tiến độ: <strong id="col-percent">0%</strong></span>
+                <div class="progress-bar-bg"><div id="col-progress-bar" class="progress-bar-fill"></div></div>
+            </div>
+            <div id="collection-grid" class="player-grid"></div>
         </section>
 
-        <!-- 3. SQUAD SECTION -->
-        <section id="squad-section" class="tab-content">
+        <!-- TAB SQUAD -->
+        <section id="tab-squad" class="tab-content">
             <div class="squad-header">
-                <h2>YOUR SQUAD (4-3-3 FORMATION)</h2>
+                <h2>ĐỘI HÌNH 4-3-3 CHUẨN</h2>
                 <div class="squad-actions">
-                    <button id="auto-build-btn" class="btn btn-accent">⚡ Auto Build Best XI</button>
-                    <div class="squad-rating-box">Team OVR: <span id="team-ovr">0</span></div>
+                    <button id="btn-autobuild" class="btn-success"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto Build Tối Ưu</button>
+                    <span class="total-rating-badge">Tổng OVR: <strong id="squad-total-ovr">0</strong></span>
                 </div>
             </div>
             <div class="pitch-container">
                 <div class="pitch">
-                    <!-- Forward Line -->
-                    <div class="pitch-row forwards">
-                        <div class="slot" data-pos="LW"><span>LW</span></div>
-                        <div class="slot" data-pos="ST"><span>ST</span></div>
-                        <div class="slot" data-pos="RW"><span>RW</span></div>
-                    </div>
-                    <!-- Midfield Line -->
-                    <div class="pitch-row midfielders">
-                        <div class="slot" data-pos="CM"><span>CM</span></div>
-                        <div class="slot" data-pos="CAM"><span>CAM</span></div>
-                        <div class="slot" data-pos="CDM"><span>CDM</span></div>
-                    </div>
-                    <!-- Defender Line -->
-                    <div class="pitch-row defenders">
-                        <div class="slot" data-pos="LB"><span>LB</span></div>
-                        <div class="slot" data-pos="CB"><span>CB</span></div>
-                        <div class="slot" data-pos="CB"><span>CB</span></div>
-                        <div class="slot" data-pos="RB"><span>RB</span></div>
-                    </div>
-                    <!-- Goalkeeper -->
-                    <div class="pitch-row goalkeeper">
-                        <div class="slot" data-pos="GK"><span>GK</span></div>
-                    </div>
+                    <div class="pitch-line center-circle"></div>
+                    <div class="pitch-line center-line"></div>
+                    <div class="pitch-line penalty-area top"></div>
+                    <div class="pitch-line penalty-area bottom"></div>
+
+                    <!-- 11 Slots 4-3-3 -->
+                    <div class="squad-slot" data-pos="LW"><span class="pos-tag">LW</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="ST"><span class="pos-tag">ST</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="RW"><span class="pos-tag">RW</span><div class="slot-card"></div></div>
+                    
+                    <div class="squad-slot" data-pos="CAM"><span class="pos-tag">CAM</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="CM"><span class="pos-tag">CM</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="CDM"><span class="pos-tag">CDM</span><div class="slot-card"></div></div>
+                    
+                    <div class="squad-slot" data-pos="LB"><span class="pos-tag">LB</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="CB1"><span class="pos-tag">CB</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="CB2"><span class="pos-tag">CB</span><div class="slot-card"></div></div>
+                    <div class="squad-slot" data-pos="RB"><span class="pos-tag">RB</span><div class="slot-card"></div></div>
+                    
+                    <div class="squad-slot" data-pos="GK"><span class="pos-tag">GK</span><div class="slot-card"></div></div>
                 </div>
             </div>
         </section>
 
-        <!-- 4. NATIONAL TEAMS SECTION -->
-        <section id="nations-section" class="tab-content">
-            <h2>NATIONAL TEAM COLLECTIONS</h2>
+        <!-- TAB NATIONAL TEAMS -->
+        <section id="tab-nations" class="tab-content">
+            <h2>BỘ SƯU TẬP QUỐC GIA</h2>
             <div id="nations-list" class="nations-grid"></div>
         </section>
 
-        <!-- 5. QUESTS & LOGIN -->
-        <section id="quests-section" class="tab-content">
-            <div class="quests-wrapper">
-                <div class="quest-box">
-                    <h3>🎁 Daily Login Bonus</h3>
-                    <p>Claim your free daily rewards!</p>
-                    <button id="claim-daily-btn" class="btn btn-primary">Claim 500 Coins</button>
+        <!-- TAB QUESTS -->
+        <section id="tab-quests" class="tab-content">
+            <h2>NHIỆM VỤ HÀNG NGÀY</h2>
+            <div class="quests-list">
+                <div class="quest-card">
+                    <div class="quest-info">
+                        <h4>Mở 5 Cầu Thủ</h4>
+                        <p>Thực hiện roll ít nhất 5 lần trong ngày</p>
+                        <small>Phần thưởng: +200 Coins, +10 XP</small>
+                    </div>
+                    <button class="btn-primary quest-claim" id="claim-q1">Nhận</button>
                 </div>
-                <div class="quest-box">
-                    <h3>📜 Daily Quests</h3>
-                    <ul id="quest-list" class="quest-list">
-                        <li><span>Roll 5 Pack Openings</span> <button class="btn btn-small">Claim 200 🪙</button></li>
-                        <li><span>Collect 1 Epic Player</span> <button class="btn btn-small">Claim 10 💎</button></li>
-                    </ul>
+                <div class="quest-card">
+                    <div class="quest-info">
+                        <h4>Sở Hữu Cầu Thủ Epic (80+)</h4>
+                        <p>Sở hữu ít nhất 1 cầu thủ 80 OVR trở lên</p>
+                        <small>Phần thưởng: +50 Gems, +25 XP</small>
+                    </div>
+                    <button class="btn-primary quest-claim" id="claim-q2">Nhận</button>
                 </div>
             </div>
         </section>
 
-        <!-- 6. SHOP SECTION -->
-        <section id="shop-section" class="tab-content">
-            <h2>GEM & COIN SHOP</h2>
+        <!-- TAB SHOP -->
+        <section id="tab-shop" class="tab-content">
+            <h2>CỬA HÀNG VẬT PHẨM</h2>
             <div class="shop-grid">
-                <div class="shop-card">
-                    <h3>Coin Pouch</h3>
-                    <p>+1,000 Coins</p>
-                    <button id="buy-coins-btn" class="btn btn-primary">10 Gems</button>
+                <div class="shop-item">
+                    <i class="fa-solid fa-coins shop-icon"></i>
+                    <h3>Túi 1000 Coins</h3>
+                    <p>Dùng để quay cầu thủ thường</p>
+                    <button class="btn-special" onclick="buyCoins(100, 1000)">100 Gems</button>
                 </div>
-                <div class="shop-card">
-                    <h3>Secret Captain Card</h3>
-                    <p>Guaranteed 90+ Legendary Player!</p>
-                    <button id="buy-captain-btn" class="btn btn-accent">50 Gems</button>
+                <div class="shop-item">
+                    <i class="fa-solid fa-gem shop-icon"></i>
+                    <h3>Túi 500 Gems</h3>
+                    <p>Tài nguyên quý hiếm</p>
+                    <button class="btn-primary" onclick="buyGemsDirect()">Ví Giả Định</button>
                 </div>
             </div>
-        </section>
-
-        <!-- 7. LEADERBOARD SECTION -->
-        <section id="leaderboard-section" class="tab-content">
-            <h2>GLOBAL LEADERBOARD</h2>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>User</th>
-                        <th>Unique Players</th>
-                        <th>Best XI Rating</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <tr><td>1</td><td>ProCollector_99</td><td>482 / 500</td><td>98.4</td></tr>
-                    <tr><td>2</td><td>FC_Legend</td><td>410 / 500</td><td>96.2</td></tr>
-                    <tr class="user-row"><td>--</td><td>You</td><td><span id="lb-user-coll">0</span> / 500</td><td><span id="lb-user-ovr">0</span></td></tr>
-                </tbody>
-            </table>
         </section>
     </main>
 
-    <!-- Particle Layer for 99 ULTIMATE -->
-    <div id="particle-canvas-container"></div>
+    <!-- REVEAL MODAL DÀNH CHO 99 RATED & SPECIAL REVEAL -->
+    <div id="special-reveal-modal" class="modal-overlay hidden">
+        <div class="reveal-content">
+            <h1 class="reveal-title">🔥 99 RATED! 🔥</h1>
+            <h3 class="reveal-subtitle">ULTIMATE PLAYER UNLOCKED</h3>
+            <div id="reveal-card-container"></div>
+            <button id="btn-close-reveal" class="btn-special">NHẬN CẦU THỦ</button>
+        </div>
+    </div>
 
     <script src="players.js"></script>
     <script src="script.js"></script>
