@@ -1,5 +1,5 @@
 /**
- * ULTIMATE FOOTBALL WEB - ENGINE WITH INVENTORY & CARD SYSTEM (STEP 3)
+ * ULTIMATE FOOTBALL WEB - GAME ENGINE (STEP 4: PACK OPENING)
  */
 
 const STORAGE_KEYS = {
@@ -16,28 +16,34 @@ const DEFAULT_GAME_DATA = {
   level: 1,
   xp: 0,
   teamOvr: 75,
-  players: [1, 2, 6, 15, 16, 20], // ID các cầu thủ khởi tạo sẵn khi mở tài khoản
+  players: [1, 2, 6, 15, 16, 20],
   team: [1, 2, 6, 15, 16, 20],
-  formation: "4-3-3",
-  missions: [],
-  transactions: [],
-  settings: { sound: true, music: true }
+  formation: "4-3-3"
+};
+
+// Cấu hình tỷ lệ Pack (Bước 4)
+const PACK_CONFIGS = {
+  STANDARD: { name: "STANDARD PACK", costType: "coins", cost: 10000, rates: { COMMON: 70, RARE: 25, EPIC: 5, LEGEND: 0, ICON: 0 } },
+  GOLD_COINS: { name: "GOLD PREMIUM PACK", costType: "coins", cost: 50000, rates: { COMMON: 0, RARE: 50, EPIC: 35, LEGEND: 14, ICON: 1 } },
+  GOLD_GEMS: { name: "GOLD PREMIUM PACK", costType: "gems", cost: 100, rates: { COMMON: 0, RARE: 50, EPIC: 35, LEGEND: 14, ICON: 1 } },
+  ULTIMATE_ICON: { name: "ULTIMATE ICON PACK", costType: "gems", cost: 500, rates: { COMMON: 0, RARE: 0, EPIC: 40, LEGEND: 45, ICON: 15 } }
 };
 
 let currentUser = null;
 let currentUserData = null;
+let pendingRevealedPlayer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
 
 function initApp() {
-  console.log("Ultimate Football Web - Step 3 Loaded");
+  console.log("Ultimate Football Web - Step 4 Engine Ready");
   checkSession();
 }
 
 // ==========================================
-// LOCALSTORAGE & SESSION
+// SESSION & LOCALSTORAGE
 // ==========================================
 
 function getRegisteredUsers() {
@@ -53,11 +59,7 @@ function loadUserData(username) {
   const key = STORAGE_KEYS.GAME_DATA_PREFIX + username.toLowerCase();
   const data = localStorage.getItem(key);
   if (data) {
-    try {
-      return JSON.parse(data);
-    } catch (e) {
-      return { ...DEFAULT_GAME_DATA };
-    }
+    try { return JSON.parse(data); } catch (e) { return { ...DEFAULT_GAME_DATA }; }
   }
   return { ...DEFAULT_GAME_DATA };
 }
@@ -93,15 +95,11 @@ function switchAuthTab(tab) {
   const regForm = document.getElementById('form-register');
 
   if (tab === 'login') {
-    loginBtn.classList.add('active');
-    regBtn.classList.remove('active');
-    loginForm.classList.add('active');
-    regForm.classList.remove('active');
+    loginBtn.classList.add('active'); regBtn.classList.remove('active');
+    loginForm.classList.add('active'); regForm.classList.remove('active');
   } else {
-    regBtn.classList.add('active');
-    loginBtn.classList.remove('active');
-    regForm.classList.add('active');
-    loginForm.classList.remove('active');
+    regBtn.classList.add('active'); loginBtn.classList.remove('active');
+    regForm.classList.add('active'); loginForm.classList.remove('active');
   }
 }
 
@@ -117,21 +115,18 @@ async function handleRegister(event) {
     showAuthError("Tên tài khoản phải từ 3 đến 16 ký tự!");
     return;
   }
-
   if (password !== passwordConfirm) {
     showAuthError("Mật khẩu xác nhận không khớp!");
     return;
   }
 
   const users = getRegisteredUsers();
-  const userKey = username.toLowerCase();
-
-  if (users[userKey]) {
+  if (users[username.toLowerCase()]) {
     showAuthError("Tên tài khoản này đã tồn tại!");
     return;
   }
 
-  users[userKey] = { username: username, password: password, createdAt: new Date().toISOString() };
+  users[username.toLowerCase()] = { username, password, createdAt: new Date().toISOString() };
   saveRegisteredUsers(users);
 
   currentUser = username;
@@ -139,7 +134,6 @@ async function handleRegister(event) {
   saveCurrentUserData();
 
   localStorage.setItem(STORAGE_KEYS.SESSION, username);
-
   hideAuthModal();
   updateUIWithUserData();
   renderInventory();
@@ -181,8 +175,7 @@ function showAuthModal() { document.getElementById('auth-modal').classList.add('
 function hideAuthModal() { document.getElementById('auth-modal').classList.remove('active'); }
 function showAuthError(msg) {
   const errBox = document.getElementById('auth-error');
-  errBox.innerText = msg;
-  errBox.style.display = 'block';
+  errBox.innerText = msg; errBox.style.display = 'block';
 }
 function hideAuthError() { document.getElementById('auth-error').style.display = 'none'; }
 
@@ -197,12 +190,9 @@ function updateUIWithUserData() {
 }
 
 // ==========================================
-// HỆ THỐNG PLAYER CARDS & INVENTORY (BƯỚC 3)
+// INVENTORY & CARD RENDERING
 // ==========================================
 
-/**
- * Render thẻ cầu thủ theo cấu trúc HTML chuẩn
- */
 function createCardHTML(player) {
   const rarityClass = `${player.rarity.toLowerCase()}-card`;
   return `
@@ -234,9 +224,6 @@ function createCardHTML(player) {
   `;
 }
 
-/**
- * Hiển thị kho cầu thủ người chơi đang sở hữu kèm Lọc, Tìm kiếm, Sắp xếp
- */
 function renderInventory() {
   if (!currentUserData || !currentUserData.players) return;
 
@@ -248,25 +235,12 @@ function renderInventory() {
   const rarityVal = document.getElementById('filter-rarity').value;
   const sortVal = document.getElementById('sort-players').value;
 
-  // Lấy toàn bộ cầu thủ người chơi sở hữu dựa trên danh sách ID trong localStorage
   let ownedPlayers = currentUserData.players.map(id => PLAYERS_DATABASE.find(p => p.id === id)).filter(Boolean);
 
-  // 1. Tìm kiếm theo tên
-  if (searchVal) {
-    ownedPlayers = ownedPlayers.filter(p => p.name.toLowerCase().includes(searchVal));
-  }
+  if (searchVal) ownedPlayers = ownedPlayers.filter(p => p.name.toLowerCase().includes(searchVal));
+  if (posVal !== 'ALL') ownedPlayers = ownedPlayers.filter(p => p.position === posVal);
+  if (rarityVal !== 'ALL') ownedPlayers = ownedPlayers.filter(p => p.rarity === rarityVal);
 
-  // 2. Lọc theo vị trí
-  if (posVal !== 'ALL') {
-    ownedPlayers = ownedPlayers.filter(p => p.position === posVal);
-  }
-
-  // 3. Lọc theo độ hiếm
-  if (rarityVal !== 'ALL') {
-    ownedPlayers = ownedPlayers.filter(p => p.rarity === rarityVal);
-  }
-
-  // 4. Sắp xếp
   ownedPlayers.sort((a, b) => {
     if (sortVal === 'OVR_DESC') return b.overall - a.overall;
     if (sortVal === 'OVR_ASC') return a.overall - b.overall;
@@ -278,16 +252,13 @@ function renderInventory() {
   countSpan.innerText = ownedPlayers.length;
 
   if (ownedPlayers.length === 0) {
-    gridContainer.innerHTML = `<div class="no-players-msg">Không tìm thấy cầu thủ nào phù hợp!</div>`;
+    gridContainer.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--text-muted);">Không tìm thấy cầu thủ nào phù hợp!</div>`;
     return;
   }
 
   gridContainer.innerHTML = ownedPlayers.map(p => createCardHTML(p)).join('');
 }
 
-/**
- * Mở Popup xem chi tiết Cầu thủ
- */
 function openPlayerModal(playerId) {
   const player = PLAYERS_DATABASE.find(p => p.id === playerId);
   if (!player) return;
@@ -296,39 +267,12 @@ function openPlayerModal(playerId) {
   const modalBody = document.getElementById('player-modal-body');
 
   modalBody.innerHTML = `
-    <div class="player-detail-container">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
       ${createCardHTML(player)}
       <div style="text-align: center;">
         <h3 style="font-family: var(--font-heading); font-size: 28px; color: var(--cyan-primary);">${player.name}</h3>
         <p style="font-size: 13px; color: var(--text-muted);">Độ hiếm: <strong style="color: #fff;">${player.rarity}</strong> | Vị trí: <strong style="color: #fff;">${player.position}</strong></p>
         <p style="font-size: 14px; color: var(--gold-primary); margin-top: 4px;">Giá thị trường: 🪙 ${player.price.toLocaleString('vi-VN')} Coins</p>
-      </div>
-
-      <div class="detail-stats-list">
-        <div class="stat-row">
-          <span>Tốc độ (PAC): <strong>${player.pace}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.pace}%;"></div></div>
-        </div>
-        <div class="stat-row">
-          <span>Sút bóng (SHO): <strong>${player.shooting}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.shooting}%;"></div></div>
-        </div>
-        <div class="stat-row">
-          <span>Chuyền bóng (PAS): <strong>${player.passing}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.passing}%;"></div></div>
-        </div>
-        <div class="stat-row">
-          <span>Rê bóng (DRI): <strong>${player.dribbling}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.dribbling}%;"></div></div>
-        </div>
-        <div class="stat-row">
-          <span>Phòng ngự (DEF): <strong>${player.defending}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.defending}%;"></div></div>
-        </div>
-        <div class="stat-row">
-          <span>Thể lực (PHY): <strong>${player.physical}</strong></span>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" style="width: ${player.physical}%;"></div></div>
-        </div>
       </div>
     </div>
   `;
@@ -336,33 +280,110 @@ function openPlayerModal(playerId) {
   modal.classList.add('active');
 }
 
-function closePlayerModal() {
-  document.getElementById('player-modal').classList.remove('active');
+function closePlayerModal() { document.getElementById('player-modal').classList.remove('active'); }
+
+// ==========================================
+// BƯỚC 4: THUẬT TOÁN MỞ PACK & HOẠT HỌA REVEAL
+// ==========================================
+
+function handleBuyPack(packTypeKey) {
+  const config = PACK_CONFIGS[packTypeKey];
+  if (!config) return;
+
+  // 1. Kiểm tra số dư Coins / Gems
+  if (config.costType === 'coins' && currentUserData.coins < config.cost) {
+    alert("Bạn không đủ Coins để mở gói này!");
+    return;
+  }
+  if (config.costType === 'gems' && currentUserData.gems < config.cost) {
+    alert("Bạn không đủ Gems để mở gói này!");
+    return;
+  }
+
+  // 2. Trừ tiền và Lưu
+  if (config.costType === 'coins') currentUserData.coins -= config.cost;
+  if (config.costType === 'gems') currentUserData.gems -= config.cost;
+  saveCurrentUserData();
+  updateUIWithUserData();
+
+  // 3. Tính toán ngẫu nhiên Rarity theo Tỷ lệ Weighted Probability
+  const chosenRarity = rollRarity(config.rates);
+
+  // 4. Lấy ngẫu nhiên cầu thủ thuộc Rarity đó
+  const availablePlayers = PLAYERS_DATABASE.filter(p => p.rarity === chosenRarity);
+  pendingRevealedPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+
+  // 5. Khởi chạy Animation Mở Pack
+  startPackOpeningAnimation(config.name);
 }
 
-/**
- * Switch Navigation Tab
- */
+function rollRarity(rates) {
+  const randomNum = Math.random() * 100;
+  let cumulative = 0;
+
+  for (const [rarity, rate] of Object.entries(rates)) {
+    cumulative += rate;
+    if (randomNum <= cumulative) {
+      return rarity;
+    }
+  }
+  return "COMMON";
+}
+
+function startPackOpeningAnimation(packTitle) {
+  const overlay = document.getElementById('pack-opening-overlay');
+  const packBox = document.getElementById('pack-3d-box');
+  const revealCard = document.getElementById('pack-reveal-card');
+  const packTitleEl = document.getElementById('pack-overlay-title');
+
+  packTitleEl.innerText = packTitle;
+  packBox.classList.remove('burst');
+  packBox.style.display = 'flex';
+  revealCard.classList.remove('show');
+
+  overlay.classList.add('active');
+}
+
+function triggerPackBurst() {
+  const packBox = document.getElementById('pack-3d-box');
+  const revealCard = document.getElementById('pack-reveal-card');
+  const cardContainer = document.getElementById('revealed-card-container');
+
+  packBox.classList.add('burst');
+
+  setTimeout(() => {
+    packBox.style.display = 'none';
+    cardContainer.innerHTML = createCardHTML(pendingRevealedPlayer);
+    revealCard.classList.add('show');
+  }, 500);
+}
+
+function closePackOpening() {
+  if (pendingRevealedPlayer) {
+    // Thêm cầu thủ vừa nhận vào kho đồ người chơi
+    currentUserData.players.push(pendingRevealedPlayer.id);
+    saveCurrentUserData();
+    renderInventory();
+    pendingRevealedPlayer = null;
+  }
+
+  const overlay = document.getElementById('pack-opening-overlay');
+  overlay.classList.remove('active');
+}
+
 function switchSection(sectionId) {
   const sections = document.querySelectorAll('.game-section');
   sections.forEach(sec => sec.classList.remove('active'));
 
   const targetSection = document.getElementById(`section-${sectionId}`);
-  if (targetSection) {
-    targetSection.classList.add('active');
-  }
+  if (targetSection) targetSection.classList.add('active');
 
   const navButtons = document.querySelectorAll('.nav-btn');
   navButtons.forEach(btn => {
     btn.classList.remove('active');
-    if (btn.getAttribute('data-target') === sectionId) {
-      btn.classList.add('active');
-    }
+    if (btn.getAttribute('data-target') === sectionId) btn.classList.add('active');
   });
 
-  if (sectionId === 'players') {
-    renderInventory();
-  }
-
+  if (sectionId === 'players') renderInventory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
