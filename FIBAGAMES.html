@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ĐĂNG NHẬP FIBAGAMES</title>
+  <title>FIBAGAMES DASHBOARD</title>
   <style>
     :root {
       --primary-cyan: #00ffcc;
       --bg-glass: rgba(10, 20, 28, 0.85);
       --discord-blue: #5865f2;
-      --wireframe-border: #3a415a;
-      --wireframe-box: #1f2937;
+      --wireframe-border: #1e293b;
+      --card-bg: #0b1322;
     }
 
     * {
@@ -29,9 +29,10 @@
       justify-content: center;
       padding: 16px;
       color: #fff;
+      overflow: hidden;
     }
 
-    /* 1. KHUNG ĐĂNG NHẬP (LOGIN MODAL) */
+    /* 1. KHUNG ĐĂNG NHẬP */
     .login-modal {
       display: flex;
       width: 100%;
@@ -39,409 +40,163 @@
       padding: 32px 36px;
       background: var(--bg-glass);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(0, 255, 204, 0.3);
       border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 255, 204, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
       position: relative;
-      overflow: hidden;
     }
 
-    .login-modal::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
-    }
-
-    .left-panel {
-      flex: 1.1;
-      padding-right: 30px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .title {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-    }
-
-    .subtitle {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--primary-cyan);
-      letter-spacing: 0.8px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
+    .left-panel { flex: 1.1; padding-right: 30px; display: flex; flex-direction: column; justify-content: center; }
+    .title { font-size: 22px; font-weight: 900; letter-spacing: 1px; margin-bottom: 24px; text-transform: uppercase; }
+    .subtitle { font-size: 13px; font-weight: 800; color: var(--primary-cyan); letter-spacing: 0.8px; margin-bottom: 6px; }
     .desc { font-size: 12px; color: #9cb1c9; line-height: 1.5; }
-
-    .right-panel {
-      flex: 0.9;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+    .right-panel { flex: 0.9; display: flex; flex-direction: column; justify-content: center; }
 
     .btn {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 0 18px;
-      height: 48px;
-      border-radius: 24px;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      background: var(--discord-blue);
-      color: #ffffff;
-      width: 100%;
+      display: flex; align-items: center; justify-content: flex-start;
+      padding: 0 18px; height: 48px; border-radius: 24px;
+      font-size: 13px; font-weight: 800; border: none; cursor: pointer;
+      background: var(--discord-blue); color: #ffffff; width: 100%;
     }
 
-    .btn:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    .icon-wrapper {
-      width: 24px; height: 24px;
-      display: flex; align-items: center; justify-content: center;
-      margin-right: 12px; flex-shrink: 0;
-    }
-
+    .icon-wrapper { width: 24px; height: 24px; margin-right: 12px; }
     .icon-wrapper img { width: 100%; height: 100%; object-fit: contain; }
     .btn-text { flex: 1; text-align: center; margin-right: 12px; }
 
-    /* 2. KHUNG ĐẶT TÊN (NAME MODAL) */
+    /* 2. KHUNG ĐẶT TÊN */
     .name-modal {
-      display: none;
-      width: 100%;
-      max-width: 480px;
-      background: #18191c;
-      border-radius: 8px;
+      display: none; width: 100%; max-width: 480px;
+      background: #18191c; border-radius: 8px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
-      overflow: hidden;
       border: 1px solid #2b2d31;
     }
 
-    .name-header {
-      background: #111214;
-      padding: 16px 20px;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .name-body {
-      padding: 24px 20px;
-      text-align: center;
-    }
-
-    .limit-text {
-      font-size: 11px;
-      color: #6d6f78;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-    }
-
-    .input-container {
-      position: relative;
-      margin-bottom: 15px;
-    }
-
+    .name-header { background: #111214; padding: 16px 20px; font-size: 18px; font-weight: 900; text-transform: uppercase; }
+    .name-body { padding: 24px 20px; text-align: center; }
+    .limit-text { font-size: 11px; color: #6d6f78; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; }
+    
+    .input-container { position: relative; margin-bottom: 15px; }
     .input-container input {
-      width: 100%;
-      height: 44px;
-      background: #2b2d31;
-      border: 1px solid #35373c;
-      border-radius: 22px;
-      padding: 0 20px 0 45px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
-      outline: none;
-      transition: border-color 0.2s;
+      width: 100%; height: 44px; background: #2b2d31; border: 1px solid #35373c;
+      border-radius: 22px; padding: 0 20px 0 45px; color: #fff; font-size: 14px; font-weight: 700; outline: none;
     }
 
-    .input-container input:focus { border-color: #5865f2; }
-
-    .check-icon {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #80848e;
-      font-size: 14px;
-    }
-
-    .notice-text {
-      font-size: 12px;
-      color: #949ba4;
-      line-height: 1.5;
-      margin-bottom: 24px;
-      padding: 0 10px;
-    }
-
-    .error-msg {
-      color: #f23f43;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 15px;
-      display: none;
-    }
+    .check-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #80848e; }
+    .notice-text { font-size: 12px; color: #949ba4; margin-bottom: 24px; line-height: 1.5; }
+    .error-msg { color: #f23f43; font-size: 12px; font-weight: 700; margin-bottom: 15px; display: none; }
 
     .btn-continue {
-      width: 100%;
-      height: 44px;
-      background: #35373c;
-      color: #80848e;
-      border: none;
-      border-radius: 22px;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: 1px;
-      cursor: not-allowed;
-      transition: all 0.2s;
-      text-transform: uppercase;
+      width: 100%; height: 44px; background: #35373c; color: #80848e;
+      border: none; border-radius: 22px; font-size: 14px; font-weight: 900; cursor: not-allowed;
     }
 
-    .btn-continue.active {
-      background: #ffffff;
-      color: #000000;
-      cursor: pointer;
-    }
+    .btn-continue.active { background: #ffffff; color: #000000; cursor: pointer; }
 
-    /* 3. TRANG CHỦ GAME (BACKGROUND MÀU ĐEN) */
+    /* 3. TRANG CHỦ GAME (DASHBOARD) */
     .dashboard-container {
-      display: none;
-      width: 100vw;
-      height: 100vh;
-      background-color: #000000;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 16px;
-      box-sizing: border-box;
-      flex-direction: column;
-      justify-content: space-between;
-      z-index: 999;
+      display: none; width: 100vw; height: 100vh;
+      background-color: #000000; position: fixed; top: 0; left: 0;
+      padding: 16px; box-sizing: border-box; flex-direction: column; justify-content: space-between;
     }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
     .user-info-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      padding: 8px 16px;
-      border-radius: 8px;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card-bg); border: 1px solid var(--wireframe-border);
+      padding: 8px 16px; border-radius: 8px;
     }
 
-    .avatar-wireframe {
-      width: 40px;
-      height: 40px;
-      background: #374151;
-      border-radius: 50%;
-      border: 1px dashed #6b7280;
-    }
+    .avatar-wireframe { width: 36px; height: 36px; background: #374151; border-radius: 50%; }
 
-    .currency-box {
-      display: flex;
-      gap: 15px;
-    }
+    .currency-box { display: flex; gap: 12px; }
 
     .currency-item {
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      background: var(--card-bg); border: 1px solid var(--wireframe-border);
+      padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: bold;
+      display: flex; align-items: center; gap: 8px;
     }
 
     .currency-icon {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
+      width: 20px; height: 20px; object-fit: contain; filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
     }
 
-    .top-icons {
-      display: flex;
-      gap: 10px;
-    }
+    .top-icons { display: flex; gap: 10px; }
 
     .icon-box {
-      width: 40px;
-      height: 40px;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      width: 38px; height: 38px; background: var(--card-bg);
+      border: 1px solid var(--wireframe-border); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
 
-    .icon-box img {
-      width: 22px;
-      height: 22px;
-      object-fit: contain;
-    }
+    .icon-box img { width: 20px; height: 20px; object-fit: contain; }
 
-    .main-content {
-      display: flex;
-      gap: 20px;
-      flex: 1;
-      margin: 16px 0;
-    }
+    .main-content { display: flex; gap: 16px; flex: 1; margin: 16px 0; }
 
-    .left-sidebar {
-      width: 120px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .left-sidebar { width: 130px; display: flex; flex-direction: column; gap: 10px; }
 
     .side-item {
-      height: 60px;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: #9ca3af;
-      text-transform: uppercase;
-      font-weight: bold;
+      height: 52px; background: var(--card-bg); border: 1px solid var(--wireframe-border);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #9ca3af; font-weight: bold; text-transform: uppercase;
     }
 
-    /* BANNER CẦU THỦ VỚI CONTAINER HIỂN THỊ ẢNH CHẮC CHẮN */
     .hero-banner-container {
-      flex: 1.2;
-      position: relative;
-      border: 1px solid var(--wireframe-border);
-      border-radius: 12px;
-      overflow: hidden;
-      background-color: #111827;
+      flex: 1.2; position: relative; border: 1px solid var(--wireframe-border);
+      border-radius: 12px; overflow: hidden; background-color: var(--card-bg);
+      display: flex; align-items: center; justify-content: center;
     }
 
     .hero-banner-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
 
     .banner-title {
-      position: absolute;
-      bottom: 15px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: #fff;
-      font-weight: 900;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.9);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      position: absolute; bottom: 20px; left: 0; right: 0;
+      text-align: center; color: #fff; font-weight: 900;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9); text-transform: uppercase; letter-spacing: 1px;
     }
 
-    .right-widgets {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .right-widgets { flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
     .widget-top {
-      flex: 2;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #6b7280;
-      font-weight: bold;
+      flex: 2; background: var(--card-bg); border: 1px solid var(--wireframe-border);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      color: #9ca3af; font-weight: bold; text-transform: uppercase;
     }
 
-    .widget-bottom {
-      flex: 1;
-      display: flex;
-      gap: 16px;
-    }
+    .widget-bottom { flex: 1; display: flex; gap: 16px; }
 
     .sub-widget {
-      flex: 1;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #6b7280;
-      font-weight: bold;
+      flex: 1; background: var(--card-bg); border: 1px solid var(--wireframe-border);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      color: #9ca3af; font-weight: bold; text-transform: uppercase;
     }
 
-    /* BOTTOM BAR VỚI ICON */
+    .btn-play { background: #15803d; color: #ffffff !important; }
+
     .bottom-bar {
-      display: flex;
-      justify-content: space-around;
-      background: #111827;
-      border: 1px solid var(--wireframe-border);
-      padding: 10px;
-      border-radius: 8px;
+      display: flex; justify-content: space-around; background: var(--card-bg);
+      border: 1px solid var(--wireframe-border); padding: 10px; border-radius: 8px;
     }
 
     .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: bold;
-      color: #9ca3af;
-      text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px; font-size: 12px;
+      font-weight: bold; color: #9ca3af; text-transform: uppercase;
     }
 
-    .nav-item img {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-    }
+    .nav-item img { width: 18px; height: 18px; object-fit: contain; }
 
     @media (max-width: 580px) {
       .login-modal { flex-direction: column; text-align: center; }
       .left-panel { padding-right: 0; margin-bottom: 24px; }
-      .right-panel { width: 100%; }
       .main-content { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 1. BẢNG ĐĂNG NHẬP FIBAGAMES -->
+  <!-- 1. LOGIN MODAL -->
   <div class="login-modal" id="loginModal">
     <div class="left-panel">
       <div class="title">ĐĂNG NHẬP FIBAGAMES</div>
@@ -458,48 +213,41 @@
     </div>
   </div>
 
-  <!-- 2. BẢNG ĐẶT TÊN NHÂN VẬT -->
+  <!-- 2. NAME MODAL -->
   <div class="name-modal" id="nameModal">
     <div class="name-header">ENTER A NAME</div>
     <div class="name-body">
       <div class="limit-text">16 CHARACTER LIMIT</div>
-      
       <div class="input-container">
         <span class="check-icon">✓</span>
         <input type="text" id="usernameInput" placeholder="ENTER USERNAME" maxlength="16" autocomplete="off">
       </div>
-
       <div class="error-msg" id="errorMsg">Tên không hợp lệ!</div>
-
       <div class="notice-text">
-        This information will be visible to other players.<br>
-        Do not include your real name or any other personal information.
+        This information will be visible to other players.<br>Do not include your real name.
       </div>
-
       <button class="btn-continue" id="continueBtn" disabled onclick="submitName()">CONTINUE</button>
     </div>
   </div>
 
-  <!-- 3. TRANG CHỦ GAME (CHỈ SỐ THÀNH 0 - ĐÃ XÓA TIỀN TỆ SỐ 3) -->
+  <!-- 3. MAIN DASHBOARD GAME -->
   <div class="dashboard-container" id="dashboard">
     <div class="top-bar">
       <div class="user-info-box">
         <div class="avatar-wireframe"></div>
         <div>
           <div id="displayUsername" style="font-weight: bold; color: #fff;">NAME</div>
-          <!-- CÀY LẠI TỪ ĐẦU: LVL 1, 0 XP -->
-          <div style="font-size: 11px; color: #10b981;">LVL 1 | 0/100XP</div>
+          <div style="font-size: 11px; color: #10b981;">LVL 1 | 0/100 XP</div>
         </div>
       </div>
 
-      <!-- ĐÃ XÓA CỘT TIỀN TỆ SỐ 3 - CÒN LẠI TIỀN VA KIM CƯƠNG = 0 -->
       <div class="currency-box">
         <div class="currency-item">
           <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="currency-icon" alt="Gold">
           <span>0</span>
         </div>
         <div class="currency-item">
-          <img src="https://cdn-icons-png.flaticon.com/512/616/616490.png" class="currency-icon" alt="Gem">
+          <img src="https://cdn-icons-png.flaticon.com/512/408/408472.png" class="currency-icon" alt="Diamond">
           <span>0</span>
         </div>
       </div>
@@ -523,31 +271,27 @@
         <div class="side-item">KHU PHỨC HỢP</div>
       </div>
 
-      <!-- BANNER CẦU THỦ THỦ CÔNG -->
       <div class="hero-banner-container">
         <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200" alt="Banner Cầu Thủ">
         <div class="banner-title">BANNER CẦU THỦ THỦ CÔNG</div>
       </div>
 
       <div class="right-widgets">
-        <div class="widget-top">
-          [ EVENT TỰ HÀO VIỆT NAM ]
-        </div>
+        <div class="widget-top">[ EVENT TỰ HÀO VIỆT NAM ]</div>
         <div class="widget-bottom">
           <div class="sub-widget">[ CÂU LẠC BỘ ]</div>
-          <div class="sub-widget" style="background: #15803d; color: #fff;">[ CHƠI ]</div>
+          <div class="sub-widget btn-play">[ CHƠI ]</div>
         </div>
       </div>
     </div>
 
-    <!-- BOTTOM BAR VỚI CÁC ICON MỚI THAY THẾ -->
     <div class="bottom-bar">
       <div class="nav-item">
-        <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSMKWZe3CjuPbV1yBfYwz4YfGLqAdXJ8mmKIjZ9WEHFvaUCZ53Z" alt="Quest">
+        <img src="https://cdn-icons-png.flaticon.com/512/3502/3502685.png" alt="Quest">
         <span>NHIỆM VỤ</span>
       </div>
       <div class="nav-item">
-        <img src="https://static.vecteezy.com/system/resources/previews/033/230/255/non_2x/shield-logo-with-star-icon-vector.jpg" alt="League">
+        <img src="https://cdn-icons-png.flaticon.com/512/869/869186.png" alt="League">
         <span>HUY HIỆU ĐỘI</span>
       </div>
       <div class="nav-item">
@@ -555,7 +299,7 @@
         <span>TRAO ĐỔI</span>
       </div>
       <div class="nav-item">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQs3Dn-5_EC7uHIqkbGBh9AhFOzPRYZftz7qrtfMdcD4w&s=10" alt="Store">
+        <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Store">
         <span>CỬA HÀNG</span>
       </div>
     </div>
@@ -566,7 +310,6 @@
     const REDIRECT_URI = encodeURIComponent(window.location.href.split('#')[0]);
     const BAD_WORDS = ['admin', 'hack', 'bitch', 'fuck', 'cc', 'cl', 'dm', 'dkm', 'sex'];
 
-    // 1. TỰ ĐỘNG XÓA TOÀN BỘ DỮ LIỆU ĐỂ BẮT ĐẦU VỚI TÀI KHOẢN MỚI HOÀN TOÀN
     localStorage.clear();
 
     function getUsedNames() {
@@ -645,9 +388,7 @@
       }
     }
 
-    function hideError() {
-      errorMsg.style.display = 'none';
-    }
+    function hideError() { errorMsg.style.display = 'none'; }
 
     function setButtonState(active) {
       if (active) {
