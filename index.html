@@ -3,484 +3,401 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultimate XI - Football Manager & Pack Opener</title>
-  <!-- Google Fonts & FontAwesome Icons -->
+  <title>Ultimate Football Web</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@600;700&family=Work+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
-
-  <!-- ================= AUTH MODAL (ĐĂNG NHẬP / ĐĂNG KÝ) ================= -->
-  <div id="modal-auth" class="modal-overlay">
-    <div class="modal-content auth-card">
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="auth-overlay active">
+    <div class="auth-card">
       <div class="auth-header">
-        <i class="fa-solid fa-trophy auth-logo"></i>
-        <h1>ULTIMATE XI</h1>
-        <p>Quản Lý Đội Bóng & Mở Thẻ Cầu Thủ</p>
+        <h2 class="auth-brand">ULTIMATE <span>FOOTBALL</span></h2>
+        <p class="auth-subtitle">Đăng nhập tài khoản để lưu tiến trình game</p>
       </div>
 
       <div class="auth-tabs">
-        <button id="tab-login-btn" class="auth-tab-btn active" onclick="switchAuthTab('login')">Đăng Nhập</button>
-        <button id="tab-register-btn" class="auth-tab-btn" onclick="switchAuthTab('register')">Đăng Ký</button>
+        <button id="tab-login-btn" class="auth-tab active" onclick="switchAuthTab('login')">ĐĂNG NHẬP</button>
+        <button id="tab-register-btn" class="auth-tab" onclick="switchAuthTab('register')">ĐĂNG KÝ</button>
       </div>
 
-      <!-- Form Đăng Nhập -->
-      <form id="form-login" onsubmit="handleLogin(event)">
-        <div class="input-group">
-          <i class="fa-solid fa-user"></i>
-          <input type="text" id="login-username" placeholder="Tên đăng nhập" required>
+      <div id="auth-error" class="auth-error-msg"></div>
+
+      <form id="form-login" class="auth-form active" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-username">Tên tài khoản</label>
+          <input type="text" id="login-username" placeholder="Nhập username..." required autocomplete="off">
         </div>
-        <div class="input-group">
-          <i class="fa-solid fa-lock"></i>
-          <input type="password" id="login-password" placeholder="Mật khẩu" required>
+        <div class="form-group">
+          <label for="login-password">Mật khẩu</label>
+          <input type="password" id="login-password" placeholder="Nhập mật khẩu..." required>
         </div>
-        <button type="submit" class="btn-cyber btn-primary w-100">ĐĂNG NHẬP <i class="fa-solid fa-arrow-right"></i></button>
+        <button type="submit" class="btn-auth-submit">ĐĂNG NHẬP NGAY</button>
       </form>
 
-      <!-- Form Đăng Ký -->
-      <form id="form-register" class="d-none" onsubmit="handleRegister(event)">
-        <div class="input-group">
-          <i class="fa-solid fa-user"></i>
-          <input type="text" id="reg-username" placeholder="Tên đăng nhập" required>
+      <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="reg-username">Tên tài khoản mới</label>
+          <input type="text" id="reg-username" placeholder="Tên tài khoản (3-16 ký tự)..." required autocomplete="off">
         </div>
-        <div class="input-group">
-          <i class="fa-solid fa-shield-halved"></i>
-          <input type="text" id="reg-club" placeholder="Tên câu lạc bộ (Ví dụ: Red Dragons)" required>
+        <div class="form-group">
+          <label for="reg-password">Mật khẩu</label>
+          <input type="password" id="reg-password" placeholder="Tạo mật khẩu..." required>
         </div>
-        <div class="input-group">
-          <i class="fa-solid fa-lock"></i>
-          <input type="password" id="reg-password" placeholder="Mật khẩu" required>
+        <div class="form-group">
+          <label for="reg-password-confirm">Xác nhận mật khẩu</label>
+          <input type="password" id="reg-password-confirm" placeholder="Nhập lại mật khẩu..." required>
         </div>
-        <button type="submit" class="btn-cyber btn-success w-100">TẠO TÀI KHOẢN <i class="fa-solid fa-plus"></i></button>
+        <button type="submit" class="btn-auth-submit">TẠO TÀI KHOẢN</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= TOP BAR & HEADER ================= -->
-  <header id="app-header" class="d-none">
-    <div class="header-left">
-      <div class="club-avatar"><i class="fa-solid fa-shield-halved"></i></div>
-      <div class="club-info">
-        <span id="user-club-name" class="club-name">CLUB NAME</span>
-        <div class="level-bar-container">
-          <span class="level-badge">LV <span id="user-level">1</span></span>
-          <div class="progress-bar"><div id="xp-progress" class="progress-fill" style="width: 20%;"></div></div>
+  <!-- PLAYER DETAIL MODAL -->
+  <div id="player-modal" class="modal-overlay">
+    <div class="modal-content player-detail-card">
+      <button class="modal-close" onclick="closePlayerModal()">✕</button>
+      <div class="modal-body" id="player-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- SQUAD PLAYER PICKER MODAL -->
+  <div id="picker-modal" class="modal-overlay">
+    <div class="modal-content picker-card">
+      <button class="modal-close" onclick="closePickerModal()">✕</button>
+      <h3 class="picker-title" id="picker-slot-title">CHỌN CẦU THỦ CHO VỊ TRÍ</h3>
+      <p class="picker-subtitle">Chọn cầu thủ thích hợp từ Kho để xếp vào sân</p>
+      <div id="picker-players-grid" class="cards-grid picker-grid"></div>
+    </div>
+  </div>
+
+  <!-- PACK OPENING ANIMATION OVERLAY -->
+  <div id="pack-opening-overlay" class="pack-overlay">
+    <div class="pack-animation-stage">
+      <div class="light-beams"></div>
+      
+      <div id="pack-3d-box" class="pack-3d-box" onclick="triggerPackBurst()">
+        <div class="pack-surface">
+          <div class="pack-badge" id="pack-overlay-title">GOLD PACK</div>
+          <div class="pack-tap-hint">NHẤP ĐỂ MỞ</div>
         </div>
+      </div>
+
+      <div id="pack-reveal-card" class="pack-reveal-card">
+        <div id="revealed-card-container"></div>
+        <button class="btn-claim-player" onclick="closePackOpening()">THU NHẬP CẦU THỦ</button>
       </div>
     </div>
+  </div>
 
-    <div class="header-right">
-      <div class="resource-badge coins">
-        <i class="fa-solid fa-coins text-gold"></i>
-        <span id="user-coins">10,000</span>
-      </div>
-      <div class="resource-badge gems">
-        <i class="fa-solid fa-gem text-cyan"></i>
-        <span id="user-gems">100</span>
-      </div>
-      <div class="resource-badge energy">
-        <i class="fa-solid fa-bolt text-warning"></i>
-        <span id="user-energy">10/10</span>
-      </div>
-      <button class="btn-icon" title="Đăng xuất" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
-    </div>
-  </header>
-
-  <!-- ================= MAIN CONTENT CONTAINER ================= -->
-  <main id="app-content" class="d-none">
-
-    <!-- 1. SECTION HOME DASHBOARD -->
-    <section id="section-home" class="app-section active">
-      <div class="welcome-banner">
-        <h2>CHÀO MỪNG TRỞ LẠI, <span id="dash-user-name">MANAGER</span>!</h2>
-        <p>Đội hình của bạn đã sẵn sàng tham gia các trận đấu kịch tính.</p>
-      </div>
-
-      <div class="dashboard-grid">
-        <div class="dash-card team-summary" onclick="switchTab('team')">
-          <div class="dash-card-icon"><i class="fa-solid fa-people-group"></i></div>
-          <div class="dash-card-info">
-            <h3>ĐỘI HÌNH CHÍNH</h3>
-            <p>OVR Đội Bóng: <b id="dash-team-ovr" class="text-cyan">80</b></p>
+  <!-- MAIN GAME CONTAINER -->
+  <div id="app" class="game-container">
+    
+    <!-- HEADER / USER BAR -->
+    <header class="top-bar">
+      <div class="user-profile">
+        <div class="avatar-container">
+          <div class="avatar-frame">
+            <img id="user-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar">
           </div>
-          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+          <span class="user-level" id="user-level">LV.1</span>
         </div>
-
-        <div class="dash-card pack-store" onclick="switchTab('packs')">
-          <div class="dash-card-icon"><i class="fa-solid fa-box-open"></i></div>
-          <div class="dash-card-info">
-            <h3>CỬA HÀNG GÓI THẺ</h3>
-            <p>Săn cầu thủ Siêu Sao & Huyền Thoại</p>
+        <div class="user-info">
+          <span id="user-name" class="username">Manager</span>
+          <div class="ovr-badge">
+            <span class="ovr-label">OVR</span>
+            <span id="team-ovr" class="ovr-value">75</span>
           </div>
-          <i class="fa-solid fa-chevron-right arrow-icon"></i>
+        </div>
+      </div>
+
+      <div class="currency-bar">
+        <div class="currency-item coins">
+          <span class="currency-icon">🪙</span>
+          <span id="coins-count" class="currency-amount">0</span>
+        </div>
+        <div class="currency-item gems">
+          <span class="currency-icon">💎</span>
+          <span id="gems-count" class="currency-amount">0</span>
+        </div>
+        <div class="currency-item energy">
+          <span class="currency-icon">⚡</span>
+          <span id="energy-count" class="currency-amount">0/0</span>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="handleLogout()" title="Đăng xuất">
+        🚪 <span>Thoát</span>
+      </button>
+    </header>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="main-content">
+
+      <!-- TRANG CHỦ -->
+      <section id="section-home" class="game-section active">
+        <div class="brand-header">
+          <h1 class="game-title">ULTIMATE <span>FOOTBALL</span> WEB</h1>
         </div>
 
-        <div class="dash-card match-arena" onclick="switchTab('gameplay')">
-          <div class="dash-card-icon"><i class="fa-solid fa-gamepad"></i></div>
-          <div class="dash-card-info">
-            <h3>TRUNG TÂM THI ĐẤU</h3>
-            <p>Mô phỏng trận đấu Real-time</p>
+        <div class="hero-grid">
+          <div class="event-banner">
+            <div class="banner-tag">SỰ KIỆN MỚI</div>
+            <h2>MÙA GIẢI ULTIMATE TOTS</h2>
+            <p>Săn lùng các huyền thoại Icon với chỉ số cực đỉnh ngay hôm nay!</p>
+            <button class="btn-banner-action" onclick="switchSection('packs')">MỞ PACK NGAY</button>
           </div>
-          <i class="fa-solid fa-chevron-right arrow-icon"></i>
-        </div>
-      </div>
-    </section>
 
-    <!-- 2. SECTION SQUAD MANAGEMENT (SÂN BÓNG 11 VỊ TRÍ) -->
-    <section id="section-team" class="app-section">
-      <div class="team-header-bar">
-        <div class="formation-selector-box">
-          <label><i class="fa-solid fa-diagram-project"></i> Sơ đồ chiến thuật:</label>
-          <select id="formation-select" class="cyber-select" onchange="changeFormation(this.value)">
-            <option value="4-3-3">4-3-3 (Tấn công)</option>
-            <option value="4-4-2">4-4-2 (Cân bằng)</option>
-            <option value="3-5-2">3-5-2 (Kiểm soát)</option>
-          </select>
-        </div>
-
-        <div class="team-ovr-box">
-          <span>TEAM OVR</span>
-          <h1 id="squad-team-ovr">82</h1>
-        </div>
-      </div>
-
-      <!-- SÂN BÓNG PITCH LAYOUT -->
-      <div class="pitch-wrapper">
-        <div class="pitch-container" id="pitch-container">
-          <!-- 11 Vị trí cầu thủ sẽ được render động bằng JavaScript -->
-        </div>
-      </div>
-
-      <!-- DỰ BỊ / RESERVES -->
-      <div class="reserves-container">
-        <h3><i class="fa-solid fa-boxes-packing"></i> DỰ BỊ & KHO CẦU THỦ</h3>
-        <div class="reserves-scroll" id="reserves-list">
-          <!-- Cầu thủ dự bị render ở đây -->
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. SECTION PLAYERS INVENTORY -->
-    <section id="section-players" class="app-section">
-      <div class="inventory-controls">
-        <div class="search-box">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="inv-search" placeholder="Tìm tên cầu thủ..." oninput="filterInventory()">
-        </div>
-
-        <select id="inv-filter-pos" class="cyber-select" onchange="filterInventory()">
-          <option value="ALL">Tất cả vị trí</option>
-          <option value="FW">Tiền đạo (FW)</option>
-          <option value="MF">Tiền vệ (MF)</option>
-          <option value="DF">Hậu vệ (DF)</option>
-          <option value="GK">Thủ môn (GK)</option>
-        </select>
-
-        <select id="inv-filter-rarity" class="cyber-select" onchange="filterInventory()">
-          <option value="ALL">Tất cả độ hiếm</option>
-          <option value="ICON">Huyền Thoại (ICON)</option>
-          <option value="SPECIAL">Đặc Biệt (SPECIAL)</option>
-          <option value="GOLD">Vàng (GOLD)</option>
-        </select>
-      </div>
-
-      <div class="players-grid" id="inventory-grid">
-        <!-- Danh sách cầu thủ sở hữu -->
-      </div>
-    </section>
-
-    <!-- 4. SECTION PACK STORE -->
-    <section id="section-packs" class="app-section">
-      <div class="section-header">
-        <h2><i class="fa-solid fa-store"></i> CỬA HÀNG GÓI THẺ CẦU THỦ</h2>
-        <p class="subtitle">Thử vận may để sở hữu những siêu sao xuất sắc nhất</p>
-      </div>
-
-      <div class="packs-grid">
-        <!-- GÓI ĐỒNG -->
-        <div class="pack-card bronze-pack">
-          <div class="pack-badge">GÓI CƠ BẢN</div>
-          <div class="pack-image"><i class="fa-solid fa-box"></i></div>
-          <h3>GÓI ĐỒNG (BRONZE)</h3>
-          <p>Cầu thủ OVR 60 - 75</p>
-          <button class="btn-cyber btn-primary w-100" onclick="buyPack('bronze', 1000, 'coins')">
-            <i class="fa-solid fa-coins text-gold"></i> 1,000 Coins
-          </button>
-        </div>
-
-        <!-- GÓI VÀNG -->
-        <div class="pack-card gold-pack">
-          <div class="pack-badge gold">PHỔ BIẾN</div>
-          <div class="pack-image"><i class="fa-solid fa-box-archive"></i></div>
-          <h3>GÓI VÀNG (GOLD)</h3>
-          <p>Cầu thủ OVR 75 - 88 (Tỷ lệ Gold cao)</p>
-          <button class="btn-cyber btn-primary w-100" onclick="buyPack('gold', 5000, 'coins')">
-            <i class="fa-solid fa-coins text-gold"></i> 5,000 Coins
-          </button>
-        </div>
-
-        <!-- GÓI CAO CẤP -->
-        <div class="pack-card premium-pack">
-          <div class="pack-badge premium">SIÊU CẤP</div>
-          <div class="pack-image"><i class="fa-solid fa-gem"></i></div>
-          <h3>GÓI KIM CƯƠNG</h3>
-          <p>Đảm bảo OVR 83+ & Tỷ lệ Special cao</p>
-          <button class="btn-cyber btn-cyan w-100" onclick="buyPack('premium', 50, 'gems')">
-            <i class="fa-solid fa-gem text-cyan"></i> 50 Gems
-          </button>
-        </div>
-
-        <!-- GÓI ICON -->
-        <div class="pack-card icon-pack">
-          <div class="pack-badge icon">HUYỀN THOẠI</div>
-          <div class="pack-image"><i class="fa-solid fa-crown"></i></div>
-          <h3>GÓI LEGENDARY ICON</h3>
-          <p>Cơ hội sở hữu các huyền thoại vĩ đại OVR 90+</p>
-          <button class="btn-cyber btn-warning w-100" onclick="buyPack('icon', 150, 'gems')">
-            <i class="fa-solid fa-gem text-cyan"></i> 150 Gems
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5. SECTION GAMEPLAY / MATCH ENGINE -->
-    <section id="section-gameplay" class="app-section">
-      <!-- PRE-MATCH DASHBOARD -->
-      <div id="pre-match-view" class="cyber-card">
-        <div class="section-header">
-          <h2><i class="fa-solid fa-gamepad"></i> TRUNG TÂM THI ĐẤU (PRE-MATCH)</h2>
-          <p class="subtitle">Thách thức các đội bóng hàng đầu và nhận thưởng hấp dẫn</p>
-        </div>
-
-        <div class="pre-match-grid">
-          <!-- MY TEAM INFO -->
-          <div class="match-team-card my-team">
-            <div class="team-badge"><i class="fa-solid fa-shield-halved"></i></div>
-            <h3 id="pm-my-team-name">ULTIMATE XI</h3>
-            <div class="ovr-badge-large" id="pm-my-ovr">85</div>
-            <div class="team-stats-mini">
-              <div><i class="fa-solid fa-bolt"></i> Công: <span id="pm-my-att">88</span></div>
-              <div><i class="fa-solid fa-brain"></i> Tuyến giữa: <span id="pm-my-mid">84</span></div>
-              <div><i class="fa-solid fa-shield"></i> Thủ: <span id="pm-my-def">83</span></div>
+          <div class="featured-player">
+            <div class="card-title-tag">FEATURED ICON</div>
+            <div class="player-card icon-card">
+              <div class="card-inner">
+                <div class="card-top">
+                  <div class="card-ovr-box">
+                    <span class="card-ovr">94</span>
+                    <span class="card-pos">RW</span>
+                  </div>
+                  <div class="card-flag">🇮🇹</div>
+                </div>
+                <div class="card-image-wrapper">
+                  <img src="https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop&q=80" alt="Leo Santoro" class="player-img">
+                </div>
+                <div class="card-info">
+                  <div class="card-name">LEO SANTORO</div>
+                  <div class="card-stats-grid">
+                    <div class="stat-box"><span>PAC</span><strong>96</strong></div>
+                    <div class="stat-box"><span>SHO</span><strong>91</strong></div>
+                    <div class="stat-box"><span>PAS</span><strong>90</strong></div>
+                    <div class="stat-box"><span>DRI</span><strong>97</strong></div>
+                    <div class="stat-box"><span>DEF</span><strong>40</strong></div>
+                    <div class="stat-box"><span>PHY</span><strong>78</strong></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- VS DIVIDER -->
-          <div class="vs-container">
-            <div class="vs-text">VS</div>
-            <div class="energy-cost-badge">
-              <i class="fa-solid fa-bolt text-warning"></i> Chi phí: <b>1 Energy</b>
-            </div>
+        <div class="quick-action-grid">
+          <button class="btn-play-primary" onclick="switchSection('gameplay')">
+            <div class="btn-glow"></div>
+            <span class="btn-icon">⚽</span>
+            <span class="btn-text">THI ĐẤU NGAY</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ĐỘI HÌNH -->
+      <section id="section-team" class="game-section">
+        <div class="team-header">
+          <div>
+            <h2 class="section-title">MY TEAM - ĐỘI HÌNH CHÍNH</h2>
+            <p class="section-subtitle">Chạm vào từng vị trí để thay đổi cầu thủ thi đấu</p>
           </div>
 
-          <!-- OPPONENT SELECTION -->
-          <div class="match-team-card opponent-team">
-            <div class="select-opp-header">CHỌN ĐỐI THỦ</div>
-            <select id="select-opponent" class="cyber-select" onchange="updateOpponentPreview()">
-              <option value="amateur">Nghiệp Dư FC (OVR ~65-70)</option>
-              <option value="semipro" selected>Bán Chuyên United (OVR ~75-80)</option>
-              <option value="pro">Chuyên Nghiệp City (OVR ~83-88)</option>
-              <option value="legend">Huyền Thoại All-Stars (OVR ~90-95)</option>
+          <div class="squad-controls">
+            <div class="formation-selector">
+              <label for="select-formation">SƠ ĐỒ CHIẾN THUẬT:</label>
+              <select id="select-formation" onchange="changeFormation(this.value)">
+                <option value="4-3-3">4-3-3 (Tấn Công)</option>
+                <option value="4-4-2">4-4-2 (Cân Bằng)</option>
+                <option value="3-5-2">3-5-2 (Kiểm Soát)</option>
+              </select>
+            </div>
+            
+            <div class="squad-rating-box">
+              <span class="rating-label">TỔNG CHỈ SỐ ĐỘI:</span>
+              <span id="squad-total-ovr" class="rating-value">75</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitch-container">
+          <div class="pitch-grass">
+            <div class="pitch-line center-circle"></div>
+            <div class="pitch-line center-line"></div>
+            <div class="pitch-line penalty-box top"></div>
+            <div class="pitch-line penalty-box bottom"></div>
+
+            <div id="pitch-slots-container" class="pitch-slots-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KHO CẦU THỦ -->
+      <section id="section-players" class="game-section">
+        <div class="inventory-header">
+          <h2 class="section-title">MY PLAYERS (<span id="inventory-count">0</span>)</h2>
+          <div class="filter-bar">
+            <input type="text" id="inventory-search" placeholder="🔍 Tìm tên cầu thủ..." oninput="renderInventory()">
+            <select id="filter-position" onchange="renderInventory()">
+              <option value="ALL">Tất cả Vị trí</option>
+              <option value="ST">ST - Tiền đạo cắm</option>
+              <option value="LW">LW - Tiền đạo trái</option>
+              <option value="RW">RW - Tiền đạo phải</option>
+              <option value="CAM">CAM - Tiền vệ công</option>
+              <option value="CM">CM - Tiền vệ trung tâm</option>
+              <option value="CDM">CDM - Tiền vệ phòng ngự</option>
+              <option value="CB">CB - Trung vệ</option>
+              <option value="LB">LB - Hậu vệ trái</option>
+              <option value="RB">RB - Hậu vệ phải</option>
+              <option value="GK">GK - Thủ môn</option>
             </select>
+            <select id="filter-rarity" onchange="renderInventory()">
+              <option value="ALL">Tất cả Độ hiếm</option>
+              <option value="ICON">ICON</option>
+              <option value="LEGEND">LEGEND</option>
+              <option value="EPIC">EPIC</option>
+              <option value="RARE">RARE</option>
+              <option value="COMMON">COMMON</option>
+            </select>
+            <select id="sort-players" onchange="renderInventory()">
+              <option value="OVR_DESC">OVR: Cao -> Thấp</option>
+              <option value="OVR_ASC">OVR: Thấp -> Cao</option>
+              <option value="PRICE_DESC">Giá: Cao -> Thấp</option>
+              <option value="PRICE_ASC">Giá: Thấp -> Cao</option>
+            </select>
+          </div>
+        </div>
+        <div id="inventory-grid" class="cards-grid"></div>
+      </section>
 
-            <div class="team-badge opp-badge" id="pm-opp-icon"><i class="fa-solid fa-dragon"></i></div>
-            <h3 id="pm-opp-name">BÁN CHUYÊN UNITED</h3>
-            <div class="ovr-badge-large opp" id="pm-opp-ovr">78</div>
-            <div class="team-stats-mini">
-              <div><i class="fa-solid fa-bolt"></i> Công: <span id="pm-opp-att">79</span></div>
-              <div><i class="fa-solid fa-brain"></i> Tuyến giữa: <span id="pm-opp-mid">77</span></div>
-              <div><i class="fa-solid fa-shield"></i> Thủ: <span id="pm-opp-def">78</span></div>
+      <!-- PACK STORE -->
+      <section id="section-packs" class="game-section">
+        <h2 class="section-title">PACK STORE - CỬA HÀNG GÓI THẺ</h2>
+        <p class="section-subtitle">Mở gói thẻ để sở hữu các cầu thủ xuất sắc nhất thế giới!</p>
+
+        <div class="packs-grid">
+          <div class="pack-card basic-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag">CƠ BẢN</span>
+              <h3>STANDARD PACK</h3>
             </div>
-          </div>
-        </div>
-
-        <div class="pre-match-actions">
-          <button class="btn-cyber btn-primary btn-xl" onclick="startMatch()">
-            <i class="fa-solid fa-play"></i> BẮT ĐẦU TRẬN ĐẤU
-          </button>
-        </div>
-      </div>
-
-      <!-- IN-MATCH ARENA VIEW (Ẩn mặc định) -->
-      <div id="in-match-view" class="cyber-card d-none">
-        <!-- SCOREBOARD HEADER -->
-        <div class="scoreboard-header">
-          <div class="sb-team home">
-            <span class="sb-name" id="sb-home-name">MY TEAM</span>
-            <span class="sb-ovr" id="sb-home-ovr">85</span>
-          </div>
-
-          <div class="sb-score-box">
-            <div class="sb-timer"><i class="fa-regular fa-clock"></i> <span id="match-timer">00'</span></div>
-            <div class="sb-score">
-              <span id="score-home">0</span> - <span id="score-away">0</span>
+            <div class="pack-visual">📦</div>
+            <div class="pack-rates">
+              <div>Common: <strong>70%</strong></div>
+              <div>Rare: <strong>25%</strong></div>
+              <div>Epic: <strong>5%</strong></div>
             </div>
-            <div class="sb-status" id="match-status-text">ĐANG THI ĐẤU</div>
-          </div>
-
-          <div class="sb-team away">
-            <span class="sb-ovr" id="sb-away-ovr">78</span>
-            <span class="sb-name" id="sb-away-name">OPPONENT</span>
-          </div>
-        </div>
-
-        <!-- MATCH SIMULATION CANVAS & RADAR -->
-        <div class="match-pitch-container">
-          <div class="pitch-lines">
-            <div class="center-circle"></div>
-            <div class="penalty-box left"></div>
-            <div class="penalty-box right"></div>
-          </div>
-          
-          <!-- BALL ANIMATION DOT -->
-          <div id="sim-ball" class="sim-ball"></div>
-
-          <!-- MATCH EVENTS COMMENTARY TICKER -->
-          <div class="commentary-box">
-            <div class="commentary-header"><i class="fa-solid fa-tower-broadcast"></i> TƯỜNG THUẬT TRỰC TIẾP</div>
-            <div id="commentary-log" class="commentary-log">
-              <div class="log-entry info">Trọng tài đã thổi còi bắt đầu trận đấu!</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MATCH CONTROLS -->
-        <div class="match-controls">
-          <div class="speed-selector">
-            <span>Tốc độ:</span>
-            <button class="btn-speed active" onclick="setMatchSpeed(1)">1x</button>
-            <button class="btn-speed" onclick="setMatchSpeed(2)">2x</button>
-            <button class="btn-speed" onclick="setMatchSpeed(4)">4x</button>
-          </div>
-
-          <div class="control-btns">
-            <button id="btn-pause-match" class="btn-cyber btn-warning" onclick="togglePauseMatch()">
-              <i class="fa-solid fa-pause"></i> Tạm Dừng
+            <button class="btn-buy-pack" onclick="handleBuyPack('STANDARD')">
+              🪙 10,000 Coins
             </button>
-            <button class="btn-cyber btn-danger" onclick="confirmForfeit()">
-              <i class="fa-solid fa-flag"></i> Đầu Hàng
+          </div>
+
+          <div class="pack-card gold-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag gold">HOT</span>
+              <h3>GOLD PREMIUM PACK</h3>
+            </div>
+            <div class="pack-visual">🎁</div>
+            <div class="pack-rates">
+              <div>Rare: <strong>50%</strong> | Epic: <strong>35%</strong></div>
+              <div>Legend: <strong>14%</strong> | Icon: <strong>1%</strong></div>
+            </div>
+            <div class="pack-actions">
+              <button class="btn-buy-pack gold" onclick="handleBuyPack('GOLD_COINS')">🪙 50,000</button>
+              <button class="btn-buy-pack gem" onclick="handleBuyPack('GOLD_GEMS')">💎 100</button>
+            </div>
+          </div>
+
+          <div class="pack-card icon-pack-card">
+            <div class="pack-header">
+              <span class="pack-tag icon">VIP</span>
+              <h3>ULTIMATE ICON PACK</h3>
+            </div>
+            <div class="pack-visual">✨</div>
+            <div class="pack-rates">
+              <div>Epic: <strong>40%</strong> | Legend: <strong>45%</strong></div>
+              <div style="color: var(--gold-primary);">Icon: <strong>15%</strong></div>
+            </div>
+            <button class="btn-buy-pack icon" onclick="handleBuyPack('ULTIMATE_ICON')">
+              💎 500 Gems
             </button>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
-
-  <!-- ================= BOTTOM NAVIGATION ================= -->
-  <nav id="bottom-nav" class="bottom-nav d-none">
-    <button class="nav-item active" onclick="switchTab('home')">
-      <i class="fa-solid fa-house"></i>
-      <span>Trang Chủ</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('team')">
-      <i class="fa-solid fa-people-group"></i>
-      <span>Đội Hình</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('players')">
-      <i class="fa-solid fa-folder-open"></i>
-      <span>Kho Cầu Thủ</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('packs')">
-      <i class="fa-solid fa-box-open"></i>
-      <span>Gói Thẻ</span>
-    </button>
-    <button class="nav-item" onclick="switchTab('gameplay')">
-      <i class="fa-solid fa-gamepad"></i>
-      <span>Thi Đấu</span>
-    </button>
-  </nav>
-
-  <!-- ================= MODAL HIỂN THỊ CHI TIẾT CẦU THỦ ================= -->
-  <div id="modal-player-detail" class="modal-overlay d-none" onclick="closePlayerModal()">
-    <div class="modal-content player-modal-card" onclick="event.stopPropagation()">
-      <div id="modal-player-card-container"></div>
-      <button class="btn-cyber btn-danger w-100 mt-15" onclick="closePlayerModal()">ĐÓNG</button>
-    </div>
-  </div>
-
-  <!-- ================= MODAL HIỆU ỨNG MỞ THẺ 3D ================= -->
-  <div id="modal-pack-opening" class="modal-overlay d-none">
-    <div class="pack-opening-stage">
-      <div id="pack-3d-box" class="pack-3d-box">
-        <i class="fa-solid fa-box-archive"></i>
-      </div>
-      <div id="pack-revealed-card" class="revealed-card-container d-none">
-        <!-- Cầu thủ mở rớt sẽ render ở đây -->
-      </div>
-      <button id="btn-claim-pack" class="btn-cyber btn-primary btn-xl d-none mt-20" onclick="closePackOpening()">
-        <i class="fa-solid fa-check"></i> NHẬN CẦU THỦ
-      </button>
-    </div>
-  </div>
-
-  <!-- ================= MODAL KẾT QUẢ TRẬN ĐẤU ================= -->
-  <div id="modal-match-result" class="modal-overlay d-none">
-    <div class="modal-content result-modal-content">
-      <div class="result-header" id="result-title-bg">
-        <h1 id="result-status-title">CHIẾN THẮNG!</h1>
-        <p id="result-subtitle">Trận đấu kết thúc đầy kịch tính</p>
-      </div>
-
-      <div class="result-scoreboard">
-        <div class="res-team">
-          <h3 id="res-home-name">MY TEAM</h3>
-          <span class="res-score" id="res-home-score">3</span>
-        </div>
-        <div class="res-vs">FT</div>
-        <div class="res-team">
-          <span class="res-score" id="res-away-score">1</span>
-          <h3 id="res-away-name">OPPONENT</h3>
-        </div>
-      </div>
-
-      <!-- STATS COMPARISON -->
-      <div class="match-stats-breakdown">
-        <h4>THỐNG KÊ TRẬN ĐẤU</h4>
-        <div class="stat-row">
-          <span id="stat-home-pos">55%</span>
-          <span>Kiểm soát bóng</span>
-          <span id="stat-away-pos">45%</span>
-        </div>
-        <div class="stat-row">
-          <span id="stat-home-shots">12</span>
-          <span>Tổng cú sút</span>
-          <span id="stat-away-shots">6</span>
-        </div>
-        <div class="stat-row">
-          <span id="stat-home-sot">7</span>
-          <span>Sút trúng đích</span>
-          <span id="stat-away-sot">2</span>
-        </div>
-      </div>
-
-      <!-- REWARDS RECEIVED -->
-      <div class="rewards-earned-box">
-        <h4>PHẦN THƯỞNG NHẬN ĐƯỢC</h4>
-        <div class="rewards-grid">
-          <div class="reward-card coins">
-            <i class="fa-solid fa-coins"></i>
-            <span id="res-coins-earned">+500</span>
-            <small>Coins</small>
+      <!-- MARKET (BƯỚC 6 INTEGRATED) -->
+      <section id="section-market" class="game-section">
+        <div class="inventory-header">
+          <h2 class="section-title">TRANSFER MARKET - CHỢ CHUYỂN NHƯỢNG</h2>
+          <div class="market-tabs">
+            <button id="tab-market-buy" class="market-tab-btn active" onclick="switchMarketTab('buy')">🛒 THỊ TRƯỜNG MUA</button>
+            <button id="tab-market-sell" class="market-tab-btn" onclick="switchMarketTab('sell')">🏷️ ĐANG BÁN (<span id="my-listings-count">0</span>)</button>
           </div>
-          <div class="reward-card xp">
-            <i class="fa-solid fa-star"></i>
-            <span id="res-xp-earned">+120</span>
-            <small>XP</small>
+          <div class="filter-bar" id="market-filter-bar">
+            <input type="text" id="market-search" placeholder="🔍 Tìm tên cầu thủ..." oninput="renderMarket()">
+            <select id="market-filter-pos" onchange="renderMarket()">
+              <option value="ALL">Tất cả Vị trí</option>
+              <option value="ST">ST</option><option value="LW">LW</option><option value="RW">RW</option>
+              <option value="CAM">CAM</option><option value="CM">CM</option><option value="CDM">CDM</option>
+              <option value="CB">CB</option><option value="LB">LB</option><option value="RB">RB</option><option value="GK">GK</option>
+            </select>
+            <select id="market-filter-rarity" onchange="renderMarket()">
+              <option value="ALL">Tất cả Độ hiếm</option>
+              <option value="ICON">ICON</option><option value="LEGEND">LEGEND</option>
+              <option value="EPIC">EPIC</option><option value="RARE">RARE</option><option value="COMMON">COMMON</option>
+            </select>
+            <select id="market-sort" onchange="renderMarket()">
+              <option value="PRICE_ASC">Giá: Thấp -> Cao</option>
+              <option value="PRICE_DESC">Giá: Cao -> Thấp</option>
+              <option value="OVR_DESC">OVR: Cao -> Thấp</option>
+            </select>
           </div>
         </div>
-      </div>
+        <div id="market-grid" class="cards-grid"></div>
+      </section>
 
-      <button class="btn-cyber btn-primary btn-xl" onclick="closeMatchResult()">
-        <i class="fa-solid fa-check"></i> NHẬN THƯỞNG & THOÁT
+      <!-- MISSIONS -->
+      <section id="section-missions" class="game-section">
+        <h2 class="section-title">DAILY MISSIONS - NHIỆM VỤ</h2>
+        <div class="placeholder-box">Nhiệm vụ Hằng Ngày (Sẽ phát triển ở Bước 7)</div>
+      </section>
+
+      <!-- GAMEPLAY -->
+      <section id="section-gameplay" class="game-section">
+        <h2 class="section-title">GAMEPLAY CANVAS</h2>
+        <div class="placeholder-box">Sân bóng Canvas (Sẽ phát triển ở Bước 8)</div>
+      </section>
+
+    </main>
+
+    <!-- NAVIGATION BAR DƯỚI -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-target="home" onclick="switchSection('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Trang Chủ</span>
       </button>
-    </div>
+      <button class="nav-btn" data-target="team" onclick="switchSection('team')">
+        <span class="nav-icon">🛡️</span>
+        <span class="nav-label">Đội Hình</span>
+      </button>
+      <button class="nav-btn" data-target="players" onclick="switchSection('players')">
+        <span class="nav-icon">🎴</span>
+        <span class="nav-label">Cầu Thủ</span>
+      </button>
+      <button class="nav-btn btn-nav-play" data-target="gameplay" onclick="switchSection('gameplay')">
+        <span class="nav-icon">⚽</span>
+        <span class="nav-label">Đấu Ngay</span>
+      </button>
+      <button class="nav-btn" data-target="packs" onclick="switchSection('packs')">
+        <span class="nav-icon">🎁</span>
+        <span class="nav-label">Gói Thẻ</span>
+      </button>
+      <button class="nav-btn" data-target="market" onclick="switchSection('market')">
+        <span class="nav-icon">⚖️</span>
+        <span class="nav-label">Chợ CN</span>
+      </button>
+      <button class="nav-btn" data-target="missions" onclick="switchSection('missions')">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">Nhiệm Vụ</span>
+      </button>
+    </nav>
+
   </div>
 
-  <!-- SCRIPTS -->
   <script src="players.js"></script>
   <script src="script.js"></script>
 </body>
