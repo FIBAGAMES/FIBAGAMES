@@ -567,3 +567,200 @@ function switchSection(sectionId) {
   if (sectionId === 'players') renderInventory();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// ==========================================
+// BƯỚC 6: HỆ THỐNG THỊ TRƯỜNG CHUYỂN NHƯỢNG (TRANSFER MARKET)
+// ==========================================
+
+let currentMarketPage = 1;
+const MARKET_PER_PAGE = 12;
+
+function renderMarket() {
+  const marketContainer = document.getElementById('market-players-list');
+  if (!marketContainer) return;
+
+  marketContainer.innerHTML = '';
+  
+  // Hiển thị các cầu thủ có sẵn trong PLAYERS_DATABASE
+  const startIndex = (currentMarketPage - 1) * MARKET_PER_PAGE;
+  const pagePlayers = PLAYERS_DATABASE.slice(startIndex, startIndex + MARKET_PER_PAGE);
+
+  pagePlayers.forEach(player => {
+    const card = document.createElement('div');
+    card.className = 'market-card';
+    card.innerHTML = `
+      <div class="player-card mini-card rarity-${player.rarity.toLowerCase()}">
+        <div class="card-ovr">${player.overall}</div>
+        <div class="card-pos">${player.position}</div>
+        <div class="card-name">${player.name}</div>
+      </div>
+      <div class="market-card-price">💰 ${player.price.toLocaleString()} Coins</div>
+      <button class="btn btn-primary" onclick="buyPlayerFromMarket(${player.id})">Mua Cầu Thủ</button>
+    `;
+    marketContainer.appendChild(card);
+  });
+}
+
+function buyPlayerFromMarket(playerId) {
+  const player = PLAYERS_DATABASE.find(p => p.id === playerId);
+  if (!player) return;
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { coins: 1000000, inventory: [] };
+
+  if (currentUser.coins < player.price) {
+    alert("❌ Bạn không đủ Coins để mua cầu thủ này!");
+    return;
+  }
+
+  // Trừ tiền và thêm cầu thủ vào Inventory
+  currentUser.coins -= player.price;
+  
+  // Clone cầu thủ kèm ID duy nhất trong Inventory
+  const newPlayer = { ...player, inventoryId: Date.now() + Math.random() };
+  currentUser.inventory.push(newPlayer);
+
+  // Lưu trữ lại LocalStorage
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  
+  alert(`🎉 Chúc mừng! Bạn đã chiêu mộ thành công ${player.name}!`);
+  
+  // Cập nhật UI
+  if (typeof updateUI === 'function') updateUI();
+  renderMarket();
+}
+
+// ==========================================
+// BƯỚC 7: HỆ THỐNG NÂNG CẤP (UPGRADE) & NHIỆM VỤ (MISSIONS)
+// ==========================================
+
+let selectedUpgradePlayer = null;
+
+function selectPlayerForUpgrade(player) {
+  selectedUpgradePlayer = player;
+  renderUpgradeUI();
+}
+
+function renderUpgradeUI() {
+  const slot = document.getElementById('upgrade-slot-target');
+  const rateBadge = document.getElementById('upgrade-success-rate');
+  const btn = document.getElementById('btn-execute-upgrade');
+
+  if (!slot) return;
+
+  if (!selectedUpgradePlayer) {
+    slot.innerHTML = `<p>Chọn 1 cầu thủ từ Kho đồ để nâng cấp</p>`;
+    slot.classList.remove('has-player');
+    if (rateBadge) rateBadge.innerText = 'Tỷ lệ thành công: 0%';
+    if (btn) btn.disabled = true;
+    return;
+  }
+
+  slot.classList.add('has-player');
+  slot.innerHTML = `
+    <div class="player-card mini-card rarity-${selectedUpgradePlayer.rarity.toLowerCase()}">
+      <div class="card-ovr">+${(selectedUpgradePlayer.upgradeLevel || 0)} ${selectedUpgradePlayer.overall}</div>
+      <div class="card-pos">${selectedUpgradePlayer.position}</div>
+      <div class="card-name">${selectedUpgradePlayer.name}</div>
+    </div>
+  `;
+
+  // Tính tỷ lệ thành công dựa trên cấp độ hiện tại
+  const currentLevel = selectedUpgradePlayer.upgradeLevel || 0;
+  const successRate = Math.max(10, 100 - (currentLevel * 15));
+
+  if (rateBadge) rateBadge.innerText = `Tỷ lệ thành công: ${successRate}%`;
+  if (btn) btn.disabled = false;
+}
+
+function executeUpgrade() {
+  if (!selectedUpgradePlayer) return;
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const upgradeCost = 50000;
+
+  if (currentUser.coins < upgradeCost) {
+    alert("❌ Bạn cần 50,000 Coins để thực hiện nâng cấp!");
+    return;
+  }
+
+  currentUser.coins -= upgradeCost;
+
+  const currentLevel = selectedUpgradePlayer.upgradeLevel || 0;
+  const successRate = Math.max(10, 100 - (currentLevel * 15));
+  const randomRoll = Math.random() * 100;
+
+  if (randomRoll <= successRate) {
+    // Nâng cấp thành công!
+    alert(`🔥 NÂNG CẤP THÀNH CÔNG! ${selectedUpgradePlayer.name} đã lên +${currentLevel + 1}!`);
+    
+    // Tìm và cập nhật chỉ số cầu thủ trong kho
+    const targetInInv = currentUser.inventory.find(p => p.inventoryId === selectedUpgradePlayer.inventoryId);
+    if (targetInInv) {
+      targetInInv.upgradeLevel = currentLevel + 1;
+      targetInInv.overall += 1;
+      targetInInv.pace += 1;
+      targetInInv.shooting += 1;
+      targetInInv.passing += 1;
+      targetInInv.dribbling += 1;
+      selectedUpgradePlayer = targetInInv;
+    }
+  } else {
+    // Nâng cấp thất bại
+    alert(`💥 NÂNG CẤP THẤT BẠI! Rất tiếc, chỉ số cầu thủ giữ nguyên.`);
+  }
+
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  if (typeof updateUI === 'function') updateUI();
+  renderUpgradeUI();
+}
+
+// --- NHIỆM VỤ (MISSIONS) ---
+const DAILY_MISSIONS = [
+  { id: 1, title: "Mở 1 Gói Cầu Thủ", reward: 20000, completed: false },
+  { id: 2, title: "Nâng cấp Cầu thủ 1 lần", reward: 50000, completed: false },
+  { id: 3, title: "Mua 1 Cầu thủ từ Market", reward: 30000, completed: false }
+];
+
+function renderMissions() {
+  const container = document.getElementById('missions-list');
+  if (!container) return;
+
+  container.innerHTML = '';
+  DAILY_MISSIONS.forEach(mission => {
+    const card = document.createElement('div');
+    card.className = 'mission-card';
+    card.innerHTML = `
+      <div class="mission-info">
+        <h4>${mission.title}</h4>
+        <p>Phần thưởng hoàn thành nhiệm vụ ngày</p>
+      </div>
+      <div class="mission-reward">
+        <span class="reward-badge">+💰 ${mission.reward.toLocaleString()}</span>
+        <button class="btn btn-primary" ${mission.completed ? 'disabled' : ''} onclick="claimMissionReward(${mission.id})">
+          ${mission.completed ? 'Đã Nhận' : 'Nhận'}
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function claimMissionReward(missionId) {
+  const mission = DAILY_MISSIONS.find(m => m.id === missionId);
+  if (!mission || mission.completed) return;
+
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  currentUser.coins = (currentUser.coins || 0) + mission.reward;
+  mission.completed = true;
+
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+  alert(`🎉 Bạn đã nhận được ${mission.reward.toLocaleString()} Coins!`);
+
+  if (typeof updateUI === 'function') updateUI();
+  renderMissions();
+}
+
+// Tự động render khi tải trang
+document.addEventListener('DOMContentLoaded', () => {
+  renderMarket();
+  renderMissions();
+});
