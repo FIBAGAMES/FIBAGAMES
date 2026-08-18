@@ -82,13 +82,10 @@ const PLAYERS_DATABASE = [
         { name: "Croatia", flag: "🇭🇷" }
     ];
 
-    const clubs = ["Real Madrid", "Barcelona", "Manchester City", "Liverpool", "Bayern Munich", "PSG", "AC Milan", "Juventus", "Manchester United", "FC Collector"];
-
     let currentId = 49;
     for (let i = 0; i < 150; i++) {
         const nat = nations[i % nations.length];
         const pos = positions[i % positions.length];
-        const club = clubs[i % clubs.length];
         const rating = 70 + (i % 25);
         
         let rarity = "COMMON";
@@ -105,7 +102,7 @@ const PLAYERS_DATABASE = [
             nationality: nat.name,
             year: 2000 + (i % 26),
             rarity: rarity,
-            club: club,
+            club: "FC Collector",
             image: nat.flag
         });
     }
