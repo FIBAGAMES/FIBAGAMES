@@ -1,3 +1,6 @@
+
+
+
 :root {
   --bg-main: #060b11;
   --bg-card: rgba(15, 23, 36, 0.75);
@@ -271,7 +274,7 @@ body {
 .placeholder-box { background: var(--bg-card); border: 1px dashed var(--bg-card-border); border-radius: 12px; padding: 60px; text-align: center; color: var(--text-muted); font-size: 16px; margin-top: 20px; }
 .section-title { font-family: var(--font-heading); font-size: 36px; color: var(--cyan-primary); }
 
-.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(8, 14, 23, 0.95); backdrop-filter: blur(16px); border-top: 1px solid rgba(0, 255, 204, 0.2); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding: 0 10px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(8, 14, 23, 0.95); backdrop-filter: blur(16px); border-top: 1px solid rgba(0, 255, 204, 0.2); display: flex; justify-around; align-items: center; z-index: 1000; padding: 0 10px; }
 .nav-btn { background: transparent; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; flex: 1; height: 100%; }
 .nav-btn.active, .nav-btn:hover { color: var(--cyan-primary); }
 .btn-nav-play { position: relative; top: -12px; background: linear-gradient(135deg, var(--cyan-primary), #009973); border-radius: 50%; width: 58px; height: 58px; flex: none; box-shadow: 0 4px 15px var(--cyan-glow); color: #04121a; }
@@ -289,26 +292,58 @@ body {
 }
 
 
-/* --- RESPONSIVE FIXES --- */
+/* --- BƯỚC 6: PACK OPENING POLISH --- */
+.pack-card .pack-rates strong { color: var(--text-light); }
+.icon-rate { color: var(--gold-primary); font-weight: 900; }
+.mega-pack-card { border-width: 2px; }
+
+.pack-3d-box[data-theme="basic"] {
+  background: linear-gradient(135deg, #cbd5e1, #64748b);
+  box-shadow: 0 0 45px rgba(148, 163, 184, 0.55);
+}
+.pack-3d-box[data-theme="premium"] {
+  background: linear-gradient(135deg, #ffe066, #ff9900);
+  box-shadow: 0 0 55px var(--gold-glow);
+}
+.pack-3d-box[data-theme="mega"] {
+  background: linear-gradient(135deg, #d946ef, #4f46e5);
+  box-shadow: 0 0 65px rgba(168, 85, 247, 0.7);
+}
+.pack-ribbon {
+  font-size: 9px; font-weight: 900; letter-spacing: 2px; opacity: 0.65; margin-bottom: 8px;
+}
+.pack-icon { font-size: 72px; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35)); animation: packIconFloat 1.4s ease-in-out infinite alternate; }
+@keyframes packIconFloat { from { transform: translateY(-4px); } to { transform: translateY(6px); } }
+.pack-status {
+  position: absolute; top: 8%; z-index: 20; font-family: var(--font-heading); font-size: 24px;
+  letter-spacing: 2px; color: #fff; text-shadow: 0 0 18px rgba(255,255,255,0.65);
+  animation: statusPulse 1.2s ease-in-out infinite alternate;
+}
+@keyframes statusPulse { from { opacity: 0.65; } to { opacity: 1; } }
+.pack-flash {
+  position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 30;
+}
+.pack-animation-stage.flash .pack-flash { animation: revealFlash 0.5s ease-out; }
+@keyframes revealFlash { 0% { opacity: 0; } 18% { opacity: 0.95; } 100% { opacity: 0; } }
+.reveal-label {
+  font-family: var(--font-heading); font-size: 24px; letter-spacing: 2px; color: var(--gold-primary);
+  text-shadow: 0 0 15px var(--gold-glow);
+}
+
+.game-toast {
+  position: fixed; left: 50%; bottom: 85px; transform: translate(-50%, 20px);
+  z-index: 7000; min-width: 260px; max-width: calc(100vw - 32px); padding: 12px 18px;
+  border-radius: 12px; background: rgba(8, 14, 23, 0.96); border: 1px solid rgba(0,255,204,0.35);
+  color: #fff; text-align: center; font-size: 13px; font-weight: 800; opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease; box-shadow: 0 12px 30px rgba(0,0,0,.45);
+}
+.game-toast.show { opacity: 1; transform: translate(-50%, 0); }
+.game-toast.success { border-color: rgba(0,255,204,.6); box-shadow: 0 0 20px rgba(0,255,204,.2); }
+.game-toast.error { border-color: rgba(239,68,68,.6); color: #fecaca; }
+
 @media (max-width: 600px) {
-  .main-content { padding: 16px 12px; }
-  .top-bar { padding: 10px 12px; gap: 8px; }
-  .user-profile { gap: 8px; min-width: 0; }
-  .avatar-frame { width: 42px; height: 42px; }
-  .username { font-size: 13px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .currency-bar { flex-wrap: wrap; justify-content: flex-end; }
-  .hero-grid { gap: 14px; }
-  .event-banner { padding: 22px; min-height: 260px; }
-  .event-banner h2 { font-size: 32px; }
-  .game-title { font-size: 30px; }
-  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .player-card { width: 160px; height: 235px; max-width: 100%; }
-  .packs-grid { grid-template-columns: 1fr; gap: 16px; }
-  .pack-card { padding: 18px; }
-  .team-header { align-items: stretch; }
-  .squad-controls { width: 100%; justify-content: space-between; gap: 10px; padding: 10px 12px; }
-  .pitch-container { overflow-x: auto; }
-  .pitch-grass { min-width: 520px; }
-  .modal-content { max-height: calc(100vh - 32px); overflow-y: auto; }
-  .picker-card { max-height: 85vh; }
+  .pack-3d-box { width: 190px; height: 280px; }
+  .pack-status { top: 5%; font-size: 17px; text-align: center; padding: 0 20px; }
+  .pack-reveal-card.show { transform: scale(0.9); }
+  .game-toast { bottom: 75px; }
 }
